@@ -135,10 +135,16 @@ public class Index
 
 	public void removeIndex()
 	{
-		log.info("Removing index: " + indexFile.getAbsolutePath());
 		try
 		{
-			FileUtils.cleanDirectory(indexFile);
+			if(indexFile.exists())
+			{
+				log.info("Removing index: " + indexFile.getAbsolutePath());
+				FileUtils.cleanDirectory(indexFile);
+			} else
+			{
+				log.info("Cannot clean " + indexFile.getAbsolutePath() + " because it does not exist");
+			}
 		} catch (IOException e)
 		{
 			log.error("Encountered error whilst cleaning index: " + e.getMessage());

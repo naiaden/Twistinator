@@ -21,18 +21,19 @@ public class Application
 {
 	public static String applicationName = "Twistinator";
 
+	public static String ApplicationVersion = "0.1";
+
+	private static ApplicationContext applicationContext;
+
 	/**
 	 * Logger for this class
 	 */
 	private static final Logger log = Logger.getLogger(Application.class);
 
-	// static Properties properties = new Properties();
-
 	/**
 	 * The application singleton
 	 */
 	private static Application theApplication;
-	private static ApplicationContext applicationContext;
 
 	/*
 	 * This can be overruled by a JVM argument, e.g.:
@@ -49,16 +50,6 @@ public class Application
 		}
 	}
 
-	public static String ApplicationVersion = "0.1";
-
-	public static void logTiming(Logger logger, String s)
-	{
-		if (applicationContext.isLogTimes())
-		{
-			logger.info(s);
-		}
-	}
-
 	/**
 	 * @return The application singleton
 	 */
@@ -69,6 +60,14 @@ public class Application
 			Application.theApplication = new Application();
 		}
 		return Application.theApplication;
+	}
+
+	public static void logTiming(Logger logger, String s)
+	{
+		if (applicationContext.isLogTimes())
+		{
+			logger.info(s);
+		}
 	}
 
 	/**
@@ -108,7 +107,7 @@ public class Application
 				{
 					index.searchIndexForTriple(applicationContext.getTriple(), numberOfResults);
 				} else
-				// word is default
+					// word is default
 				{
 					index.searchIndexForWord(applicationContext.getWord(), numberOfResults);
 				}
