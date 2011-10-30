@@ -1,0 +1,212 @@
+/**
+ * 
+ */
+package nl.naiaden.twistinator.indexer;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.regex.Pattern;
+
+import nl.naiaden.twistinator.Application;
+import nl.naiaden.twistinator.analysis.PatternAnalyzer;
+import nl.naiaden.twistinator.indexer.document.Triple;
+import nl.naiaden.twistinator.indexer.input.AsynchronousSentsReader;
+import nl.naiaden.twistinator.indexer.output.AsynchronousIndexerWriter;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.CharArraySet;
+import org.apache.lucene.analysis.PerFieldAnalyzerWrapper;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.KeepOnlyLastCommitDeletionPolicy;
+import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.Version;
+
+/**
+ * @author louis
+ * 
+ */
+public class Index
+{
+	static Logger log = Logger.getLogger(Index.class);
+
+	private File indexFile;
+	private Directory indexDirectory;
+
+	public Index(File indexFile) throws IOException
+	{
+		this.indexFile = indexFile;
+		indexDirectory = FSDirectory.open(indexFile);
+	}
+
+	public void addToIndex(File inputFile)
+	{
+		try
+		{
+			//			Directory directory = FSDirectory.open(indexFile);
+
+			Pattern tripleSplitter = Triple.tripleSplitter;
+			CharArraySet noStopWords = new CharArraySet(Version.LUCENE_34, 0, false);
+
+			PerFieldAnalyzerWrapper pfaWrapper = new PerFieldAnalyzerWrapper(new StandardAnalyzer(Version.LUCENE_33));
+			Analyzer tripleAnalyzer = new PatternAnalyzer(Version.LUCENE_33, tripleSplitter, false, noStopWords);
+			pfaWrapper.addAnalyzer("triples", tripleAnalyzer);
+
+			IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_33, pfaWrapper);
+			indexWriterConfig.setIndexDeletionPolicy(new KeepOnlyLastCommitDeletionPolicy());
+
+			long startBuilding = System.nanoTime();
+			IndexWriter indexWriter = new IndexWriter(indexDirectory, indexWriterConfig);
+
+			LinkedBlockingQueue<Document> queue = new LinkedBlockingQueue<Document>(10000);
+
+			AsynchronousSentsReader reader = new AsynchronousSentsReader(inputFile, queue);
+			Thread readerThread = new Thread(reader, "AsynReader");
+			readerThread.start();
+
+			AsynchronousIndexerWriter writer = new AsynchronousIndexerWriter(indexWriter, queue, 100);
+			Thread writerThread = new Thread(writer, "AsyncWriter");
+			writerThread.start();
+			//			AsynchronousIndexerWriter writer1 = new AsynchronousIndexerWriter(indexWriter, queue, 100);
+			//			Thread writerThread1 = new Thread(writer1, "AsyncWriter1");
+			//			writerThread1.start();
+			//			AsynchronousIndexerWriter writer2 = new AsynchronousIndexerWriter(indexWriter, queue, 100);
+			//			Thread writerThread2 = new Thread(writer2, "AsyncWriter2");
+			//			writerThread2.start();
+			//			AsynchronousIndexerWriter writer3 = new AsynchronousIndexerWriter(indexWriter, queue, 100);
+			//			Thread writerThread3 = new Thread(writer3, "AsyncWriter3");
+			//			writerThread3.start();
+
+
+			try
+			{
+				readerThread.join();
+				writer.keepRunning = false;
+				//				writer1.keepRunning = false;
+				//				writer2.keepRunning = false;
+				//				writer3.keepRunning = false;
+				writerThread.join();
+				//				writerThread1.join();
+				//				writerThread2.join();
+				//				writerThread3.join();
+
+				writer.optimize();
+				writer.close();
+
+				Application.logTiming(log, "Building index took " + (System.nanoTime() - startBuilding) * 1e-9 + " seconds");
+				log.info("Index size: " + FileUtils.byteCountToDisplaySize(FileUtils.sizeOf(indexFile)));
+
+			} catch (InterruptedException e)
+			{
+				// TODO Auto-generated catch block
+				// e.printStackTrace();
+			}
+
+		} catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public void close() throws IOException
+	{
+		indexDirectory.close();
+	}
+
+	public void createIndex(File inputFile)
+	{
+		removeIndex();
+		addToIndex(inputFile);
+	}
+
+	public void removeIndex()
+	{
+		log.info("Removing index: " + indexFile.getAbsolutePath());
+		try
+		{
+			FileUtils.cleanDirectory(indexFile);
+		} catch (IOException e)
+		{
+			log.error("Encountered error whilst cleaning index: " + e.getMessage());
+		}
+	}
+
+	public void searchIndexForTriple(Triple triple, int numberOfResults)
+	{
+		try
+		{
+			IndexReader indexReader = IndexReader.open(indexDirectory);
+			IndexSearcher indexSearcher = new IndexSearcher(indexReader);
+
+			Pattern tripleSplitter = Triple.tripleSplitter;
+			CharArraySet noStopWords = new CharArraySet(Version.LUCENE_34, 0, false);
+
+			Analyzer tripleAnalyzer = new PatternAnalyzer(Version.LUCENE_33, tripleSplitter, false, noStopWords);
+			QueryParser queryParser = new QueryParser(Version.LUCENE_34, "triples", tripleAnalyzer);
+			Query tQuery = queryParser.parse(triple.toString());
+
+			ScoreDoc[] hits = indexSearcher.search(tQuery, null, 1000).scoreDocs;
+			System.out.println("Number of hits for '" + triple + "' in triples: " + hits.length);
+
+		} catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	public void searchIndexForWord(String word, int numberOfResults)
+	{
+		try
+		{
+			IndexReader indexReader = IndexReader.open(indexDirectory);
+			IndexSearcher indexSearcher = new IndexSearcher(indexReader);
+
+			Analyzer normalAnalyzer = new StandardAnalyzer(Version.LUCENE_34);
+			QueryParser queryParser = new QueryParser(Version.LUCENE_34, "sentence", normalAnalyzer);
+			Query nQuery = queryParser.parse(word);
+
+			TopDocs nTopDocs = indexSearcher.search(nQuery, null, numberOfResults);
+			log.info("Number of hits for '" + word + "' in sentence: " + nTopDocs.totalHits + " (showing first " + numberOfResults + " documents)");
+
+			/*
+			 * For paginated results see
+			 * http://hrycan.com/2010/02/10/paginating-lucene-search-results/
+			 */
+			for(ScoreDoc scoreDoc : nTopDocs.scoreDocs)
+			{
+				Document doc = indexSearcher.doc(scoreDoc.doc);
+				System.out.printf("[%5.3f] %s\n", scoreDoc.score, doc.get("sentence"));
+			}
+
+		} catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+}
