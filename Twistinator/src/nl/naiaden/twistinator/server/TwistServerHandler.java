@@ -3,135 +3,77 @@
  */
 package nl.naiaden.twistinator.server;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import nl.naiaden.twistinator.objects.SearchQuery;
+import nl.naiaden.twistinator.objects.SearchResult;
+import nl.naiaden.twistinator.objects.ThankYouMessage;
+
 import org.apache.log4j.Logger;
-import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelEvent;
+import org.jboss.netty.channel.ChannelFuture;
+import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ChannelState;
 import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
-import org.jboss.netty.channel.group.ChannelGroup;
+import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 
 /**
  * @author louis
  *
  */
-public class TwistServerHandler extends SimpleChannelHandler
+public class TwistServerHandler extends SimpleChannelUpstreamHandler
 {
 	static Logger log = Logger.getLogger(TwistServerHandler.class);
 
-	/**
-	 * Is there any Pong message to send
-	 */
-	private final AtomicInteger isPong = new AtomicInteger(0);
+	private final AtomicLong transferredMessages = new AtomicLong();
 
-	/**
-	 * Bytes monitor
-	 */
-	public static final AtomicLong transferredBytes = new AtomicLong();
-
-	/**
-	 * Returns the number of transferred bytes
-	 * @return the number of transferred bytes
-	 */
-	public static long getTransferredBytes() {
-		return transferredBytes.get();
-	}
-
-	/**
-	 * Pong object
-	 */
-	private PingPong pp;
-
-	/**
-	 * Channel Group
-	 */
-	private ChannelGroup channelGroup = null;
-
-	/**
-	 * Constructor
-	 * @param channelGroup
-	 */
-	public TwistServerHandler(ChannelGroup channelGroup) {
-		this.channelGroup = channelGroup;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jboss.netty.channel.SimpleChannelHandler#channelConnected(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.ChannelStateEvent)
-	 */
 	@Override
-	public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e)
-			throws Exception {
-		channelGroup.add(ctx.getChannel());
+	public void exceptionCaught(
+			final ChannelHandlerContext ctx, final ExceptionEvent e) {
+		log.warn(
+				"Unexpected exception from downstream.",
+				e.getCause());
+		e.getChannel().close();
 	}
 
-	/**
-	 * If write of Pong was not possible before, just do it now
-	 */
-	@Override
-	public void channelInterestChanged(ChannelHandlerContext ctx,
-			ChannelStateEvent e) {
-		generatePongTraffic(e);
+	public long getTransferredMessages() {
+		return transferredMessages.get();
 	}
 
 	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
-		log.warn("Unexpected exception from downstream.", e
-				.getCause());
-		Channels.close(e.getChannel());
-	}
-
-	/**
-	 * When a Ping message is received, send a new Pong
-	 */
-	@Override
-	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
-		PingPong pptmp = (PingPong) e.getMessage();
-		if (pptmp != null) {
-			pp = pptmp;
-			log.info(pp.toString());
-			TwistServerHandler.transferredBytes.addAndGet(pp.status.length +
-					pp.test1.length() + 16);
-			isPong.incrementAndGet();
-			generatePongTraffic(e);
+	public void handleUpstream(
+			final ChannelHandlerContext ctx, final ChannelEvent e) throws Exception {
+		if (e instanceof ChannelStateEvent &&
+				((ChannelStateEvent) e).getState() != ChannelState.INTEREST_OPS) {
+			log.info(e.toString());
 		}
+		super.handleUpstream(ctx, e);
 	}
 
-	/**
-	 * Used when write is possible
-	 * @param e
-	 */
-	private void generatePongTraffic(ChannelStateEvent e) {
-		if (isPong.intValue() > 0) {
-			Channel channel = e.getChannel();
-			sendPongTraffic(channel);
-		}
-	}
+	@Override
+	public void messageReceived(
+			final ChannelHandlerContext ctx, final MessageEvent e) {
+		// Echo back the received object to the client.
+		if(e.getMessage() instanceof ThankYouMessage)
+		{
+			log.info("Thanks for serving me");
 
-	/**
-	 * Used when a Ping message is received
-	 * @param e
-	 */
-	private void generatePongTraffic(MessageEvent e) {
-		if (isPong.intValue() > 0) {
-			Channel channel = e.getChannel();
-			sendPongTraffic(channel);
-		}
-	}
-
-	/**
-	 * Truly send the Pong
-	 * @param channel
-	 */
-	private void sendPongTraffic(Channel channel) {
-		if ((channel.getInterestOps() & Channel.OP_WRITE) == 0) {
-			pp.rank ++;
-			isPong.decrementAndGet();
-			Channels.write(channel, pp);
+			final ChannelFuture future = e.getChannel().close();
+			future.addListener(new ChannelFutureListener()
+			{
+				public void operationComplete(final ChannelFuture future)
+				{
+					log.info("post-closure");
+				}
+			});
+		} if(e.getMessage() instanceof SearchQuery)
+		{
+			transferredMessages.incrementAndGet();
+			log.info(((SearchQuery) e.getMessage()).toString());
+			e.getChannel().write(new SearchResult("test"));
 		}
 	}
 }

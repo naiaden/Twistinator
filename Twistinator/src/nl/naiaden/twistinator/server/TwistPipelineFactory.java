@@ -12,7 +12,6 @@ import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.handler.codec.serialization.ObjectDecoder;
 import org.jboss.netty.handler.codec.serialization.ObjectEncoder;
-import org.jboss.netty.handler.execution.ExecutionHandler;
 import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
 
 /**
@@ -64,9 +63,8 @@ public class TwistPipelineFactory implements ChannelPipelineFactory
 		ChannelPipeline pipeline = Channels.pipeline();
 		pipeline.addLast("decoder", new ObjectDecoder());
 		pipeline.addLast("encoder", new ObjectEncoder());
-		pipeline.addLast("pipelineExecutor", new ExecutionHandler(pipelineExecutor));
-		TwistServerHandler handler = new TwistServerHandler(channelGroup);
-		pipeline.addLast("handler", handler);
+
+		pipeline.addLast("handler", new TwistServerHandler());
 		max--;
 		System.out.println("Continue... " + max);
 		return pipeline;

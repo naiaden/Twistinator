@@ -4,7 +4,6 @@
 package nl.naiaden.twistinator;
 
 import nl.naiaden.twistinator.client.TwistClient;
-import nl.naiaden.twistinator.server.TwistServer;
 
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
@@ -21,7 +20,7 @@ public class Test_ServerClient
 
 	static
 	{
-		org.apache.log4j.Logger rootLogger = org.apache.log4j.Logger.getRootLogger();
+		final org.apache.log4j.Logger rootLogger = org.apache.log4j.Logger.getRootLogger();
 		if (!rootLogger.getAllAppenders().hasMoreElements())
 		{
 			rootLogger.setLevel(Level.DEBUG);
@@ -34,23 +33,23 @@ public class Test_ServerClient
 	 */
 	public static void main(final String[] args)
 	{
-		Thread serverThread = new Thread()
-		{
-			@Override
-			public void run()
-			{
-				try
-				{
-					TwistServer.main(args);
-				} catch (Exception e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		};
+		//		Thread serverThread = new Thread()
+		//		{
+		//			@Override
+		//			public void run()
+		//			{
+		//				try
+		//				{
+		//					TwistServer.main(args);
+		//				} catch (Exception e)
+		//				{
+		//					// TODO Auto-generated catch block
+		//					e.printStackTrace();
+		//				}
+		//			}
+		//		};
 
-		Thread clientThread = new Thread()
+		final Thread clientThread = new Thread()
 		{
 			@Override
 			public void run()
@@ -58,7 +57,7 @@ public class Test_ServerClient
 				try
 				{
 					TwistClient.main(args);
-				} catch (Exception e)
+				} catch (final Exception e)
 				{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -66,14 +65,14 @@ public class Test_ServerClient
 			}
 		};
 
-		serverThread.start();
-		try
-		{
-			Thread.sleep(100);
-		} catch (Exception e)
-		{
-			// TODO: handle exception
-		}
+		//		serverThread.start();
+		//		try
+		//		{
+		//			Thread.sleep(100);
+		//		} catch (Exception e)
+		//		{
+		//			// TODO: handle exception
+		//		}
 
 		clientThread.start();
 
