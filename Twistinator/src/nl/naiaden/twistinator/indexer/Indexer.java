@@ -34,7 +34,7 @@ public class Indexer implements Runnable
 			try
 			{
 				Document doc = documentQueue.take();
-				log.debug(doc.get("id") + " <<< " + doc.get("sentence"));
+				log.debug(doc.get(Index.FIELD_ID) + " <<< " + doc.get(Index.FIELD_SENTENCE));
 				// process item
 			} catch (InterruptedException e)
 			{

@@ -48,6 +48,11 @@ public class Index
 
 	private File indexFile;
 	private Directory indexDirectory;
+	
+	public static final String FIELD_ID = "id";
+	public static final String FIELD_TRIPLES = "triples";
+	public static final String FIELD_SENTENCE = "sentence";
+	public static final String FIELD_NRPARSES = "nrParses";
 
 	public Index(File indexFile) throws IOException
 	{
@@ -167,10 +172,10 @@ public class Index
 			// Unless a query really contains a wildcard, we do it the normal way 
 			if(triple.containsWildcard())
 			{
-				tQuery = new WildcardQuery(new Term("triples", triple.toString(false)));
+				tQuery = new WildcardQuery(new Term(FIELD_TRIPLES, triple.toString(false)));
 			} else
 			{
-				tQuery = new TermQuery(new Term("triples", triple.toString(false)));
+				tQuery = new TermQuery(new Term(FIELD_TRIPLES, triple.toString(false)));
 			}
 
 			ScoreDoc[] hits = indexSearcher.search(tQuery, null, 1000).scoreDocs;
@@ -196,7 +201,7 @@ public class Index
 			IndexSearcher indexSearcher = new IndexSearcher(indexReader);
 
 			Analyzer normalAnalyzer = new StandardAnalyzer(Version.LUCENE_34);
-			QueryParser queryParser = new QueryParser(Version.LUCENE_34, "sentence", normalAnalyzer);
+			QueryParser queryParser = new QueryParser(Version.LUCENE_34, FIELD_SENTENCE, normalAnalyzer);
 			Query nQuery = queryParser.parse(word);
 
 			TopDocs nTopDocs = indexSearcher.search(nQuery, null, numberOfResults);
@@ -209,7 +214,7 @@ public class Index
 			for(ScoreDoc scoreDoc : nTopDocs.scoreDocs)
 			{
 				Document doc = indexSearcher.doc(scoreDoc.doc);
-				System.out.printf("[%5.3f] %s\n", scoreDoc.score, doc.get("sentence"));
+				System.out.printf("[%5.3f] %s\n", scoreDoc.score, doc.get(FIELD_SENTENCE));
 			}
 
 		} catch (IOException e)

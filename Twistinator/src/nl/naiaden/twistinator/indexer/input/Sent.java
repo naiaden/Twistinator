@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 
+import nl.naiaden.twistinator.indexer.Index;
 import nl.naiaden.twistinator.indexer.document.Triple;
 import nl.naiaden.twistinator.indexer.document.Triples;
 
@@ -150,14 +151,14 @@ public class Sent
 			// }
 
 			// headerMatcher.group(0) is the complete sentence header
-			doc.add(new Field("id", headerMatcher.group(1), Field.Store.YES, Field.Index.NOT_ANALYZED));
+			doc.add(new Field(Index.FIELD_ID, headerMatcher.group(1), Field.Store.YES, Field.Index.NOT_ANALYZED));
 			// doc.add(new Field("id", headerMatcher.group(2), Field.Store.YES,
 			// Field.Index.NOT_ANALYZED));
-			doc.add(new Field("nrParses", headerMatcher.group(3), Field.Store.YES, Field.Index.NOT_ANALYZED));
-			doc.add(new Field("sentence", headerMatcher.group(4), Field.Store.YES, Field.Index.ANALYZED)); // NO
+			doc.add(new Field(Index.FIELD_NRPARSES, headerMatcher.group(3), Field.Store.YES, Field.Index.NOT_ANALYZED));
+			doc.add(new Field(Index.FIELD_SENTENCE, headerMatcher.group(4), Field.Store.YES, Field.Index.ANALYZED)); // NO
 		}
 
-		doc.add(new Field("triples", triples.toString(), Field.Store.YES, Field.Index.ANALYZED)); // NA
+		doc.add(new Field(Index.FIELD_TRIPLES, triples.toString(), Field.Store.YES, Field.Index.ANALYZED)); // NA
 
 //		log.debug(doc.get("id") + " +++ " + sent.getTriples().toString());
 
