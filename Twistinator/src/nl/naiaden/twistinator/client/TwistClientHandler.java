@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import nl.naiaden.twistinator.objects.SearchQuery;
 import nl.naiaden.twistinator.objects.SearchResult;
+import nl.naiaden.twistinator.objects.ThankYouMessage;
 
 import org.apache.log4j.Logger;
 import org.jboss.netty.channel.ChannelEvent;
@@ -95,6 +96,7 @@ public class TwistClientHandler extends SimpleChannelUpstreamHandler
 		// Echo back the received object to the client.
 		transferredMessages.incrementAndGet();
 
+		e.getChannel().write(new ThankYouMessage());
 		e.getChannel().close().addListener(new ChannelFutureListener()
 		{
 			public void operationComplete(ChannelFuture future)

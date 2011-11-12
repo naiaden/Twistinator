@@ -38,4 +38,9 @@ public class Relator
 	{
 		return relator;
 	}
+	
+	public boolean containsWildcard()
+	{		
+		return relator.contains("*") || relator.contains("?");
+	}
 }

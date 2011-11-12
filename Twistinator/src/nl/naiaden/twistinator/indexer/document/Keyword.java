@@ -65,4 +65,9 @@ public class Keyword
 	{
 		return keyword;
 	}
+	
+	public boolean containsWildcard()
+	{		
+		return keyword.contains("*") || keyword.contains("?");
+	}
 }

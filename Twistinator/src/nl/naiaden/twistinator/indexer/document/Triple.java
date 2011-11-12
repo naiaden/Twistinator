@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
  */
 public class Triple
 {
-	public static final Pattern dupiraTripleRegex = Pattern.compile("\\[([a-zA-Z0-9()+'%/: -.#]+),(\\w+),([a-zA-Z0-9()/+'%: -.#]+)\\]"); // "[(.*?),(.*?),(.*?)]";
+	public static final Pattern dupiraTripleRegex = Pattern.compile("\\[([a-zA-Z0-9()+'%/: -.#?*]+),(\\w+),([a-zA-Z0-9()/+'%: -.#?*]+)\\]"); // "[(.*?),(.*?),(.*?)]";
 
 	/**
 	 * The internal triple representation can be split into its fields using
@@ -123,6 +123,11 @@ public class Triple
 		modifier = keyword;
 	}
 
+	public boolean containsWildcard()
+	{
+		return head.containsWildcard() || relator.containsWildcard() || modifier.containsWildcard();
+	}
+	
 	/**
 	 * Note that a triple is marked with angled brackets. This is in order to prevent the indexers
 	 * from interpreting the bracket: the square brackets are to denote a range in Lucene for
@@ -136,6 +141,24 @@ public class Triple
 		if(head != null && relator != null && modifier != null)
 		{
 			s.append("<" + head.toString() + "," + relator.toString() + "," + modifier.toString() + ">");
+		} else
+		{
+			s.append("");
+		}
+
+		return s.toString();
+	}
+	
+	public String toString(boolean delimiters)
+	{
+		StringBuilder s = new StringBuilder();
+		
+		if(head != null && relator != null && modifier != null)
+		{
+			if(delimiters)
+				s.append("<" + head.toString() + "," + relator.toString() + "," + modifier.toString() + ">");
+			else
+				s.append(head.toString() + "," + relator.toString() + "," + modifier.toString());
 		} else
 		{
 			s.append("");

@@ -25,12 +25,14 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.KeepOnlyLastCommitDeletionPolicy;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
@@ -157,22 +159,35 @@ public class Index
 		{
 			IndexReader indexReader = IndexReader.open(indexDirectory);
 			IndexSearcher indexSearcher = new IndexSearcher(indexReader);
+		
+			Query tQuery = null;
+			
+			// Wildcard queries can be much slower as they need to iterate over many terms.
+			// Unless a query really contains a wildcard, we do it the normal way 
+			if(triple.containsWildcard())
+			{
+				tQuery = new WildcardQuery(new Term("triples", triple.toString(false)));
+			} else
+			{
+				Pattern tripleSplitter = Triple.tripleSplitter;
+				CharArraySet noStopWords = new CharArraySet(Version.LUCENE_34, 0, false);
 
-			Pattern tripleSplitter = Triple.tripleSplitter;
-			CharArraySet noStopWords = new CharArraySet(Version.LUCENE_34, 0, false);
-
-			Analyzer tripleAnalyzer = new PatternAnalyzer(Version.LUCENE_33, tripleSplitter, false, noStopWords);
-			QueryParser queryParser = new QueryParser(Version.LUCENE_34, "triples", tripleAnalyzer);
-			Query tQuery = queryParser.parse(triple.toString());
+				Analyzer tripleAnalyzer = new PatternAnalyzer(Version.LUCENE_33, tripleSplitter, false, noStopWords);
+				QueryParser queryParser = new QueryParser(Version.LUCENE_34, "triples", tripleAnalyzer);
+				try
+				{
+					tQuery = queryParser.parse(triple.toString());
+				} catch (ParseException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}	
+			}
 
 			ScoreDoc[] hits = indexSearcher.search(tQuery, null, 1000).scoreDocs;
 			System.out.println("Number of hits for '" + triple + "' in triples: " + hits.length);
 
 		} catch (IOException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ParseException e)
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
