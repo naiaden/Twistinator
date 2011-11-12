@@ -154,7 +154,7 @@ public class Index
 		}
 	}
 
-	public void searchIndexForTriple(Triple triple, int numberOfResults)
+	public ScoreDoc[] searchIndexForTriple(Triple triple, int numberOfResults)
 	{
 		try
 		{
@@ -174,7 +174,9 @@ public class Index
 			}
 
 			ScoreDoc[] hits = indexSearcher.search(tQuery, null, 1000).scoreDocs;
-			System.out.println("Number of hits for '" + triple + "' in triples: " + hits.length);
+			log.info("Number of hits for '" + triple + "' in triples: " + hits.length);
+			
+			return hits;
 
 		} catch (IOException e)
 		{
@@ -182,6 +184,8 @@ public class Index
 			e.printStackTrace();
 		}
 
+		log.warn("Searching index for triples failed!");
+		return null;
 	}
 
 	public void searchIndexForWord(String word, int numberOfResults)
