@@ -31,6 +31,7 @@ import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.store.Directory;
@@ -169,19 +170,7 @@ public class Index
 				tQuery = new WildcardQuery(new Term("triples", triple.toString(false)));
 			} else
 			{
-				Pattern tripleSplitter = Triple.tripleSplitter;
-				CharArraySet noStopWords = new CharArraySet(Version.LUCENE_34, 0, false);
-
-				Analyzer tripleAnalyzer = new PatternAnalyzer(Version.LUCENE_33, tripleSplitter, false, noStopWords);
-				QueryParser queryParser = new QueryParser(Version.LUCENE_34, "triples", tripleAnalyzer);
-				try
-				{
-					tQuery = queryParser.parse(triple.toString());
-				} catch (ParseException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}	
+				tQuery = new TermQuery(new Term("triples", triple.toString(false)));
 			}
 
 			ScoreDoc[] hits = indexSearcher.search(tQuery, null, 1000).scoreDocs;
