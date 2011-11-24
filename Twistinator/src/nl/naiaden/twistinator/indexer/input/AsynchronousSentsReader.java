@@ -36,6 +36,10 @@ public class AsynchronousSentsReader implements Runnable
 		this.documentQueue = documentQueue;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 */
 	public void run()
 	{
 		log.info("+++ Asynchronous Sents Reader");
