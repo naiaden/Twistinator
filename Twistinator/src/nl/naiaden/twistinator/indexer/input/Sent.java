@@ -21,19 +21,38 @@ public class Sent
 {
 	public static final String headerRegex = "^# \\(null\\) (\\d+) (\\d+)-(\\d+)\\|(.*)$";
 
-	private String header;
+	private String id;
+	private String sentence;
 	private Triples triples;
-	private int parentDocument;
+	private String parentDocument;
 
+	public Sent(String id, String sentence, Triples triples, String parentDocument)
+	{
+		this.id = id;
+		this.parentDocument = parentDocument;
+		this.sentence = sentence;
+		this.triples = triples;
+	}
+	
+	public void setSentence(String sentence)
+	{
+		this.sentence = sentence;
+	}
+	
+	public String getSentence()
+	{
+		return sentence;
+	}
+	
 	/**
 	 * 
 	 * @param header
 	 * @param triples
 	 * @param parentDocument
 	 */
-	public Sent(String header, Triples triples, int parentDocument)
+	public Sent(String header, Triples triples, String parentDocument)
 	{
-		this.header = header;
+		processHeader(header);
 		this.triples = triples;
 		this.parentDocument = parentDocument;
 	}
@@ -45,16 +64,15 @@ public class Sent
 	 */
 	public Sent(String header, Triples triples)
 	{
-		this.header = header;
-		this.triples = triples;
-		this.parentDocument = -1;
+		this(header,triples,null);
 	}
 
 	public Sent()
 	{
-		this.header = new String();
+		this.id = null;
+		this.sentence = null;
 		this.triples = new Triples();
-		this.parentDocument = -1;
+		this.parentDocument = null;
 	}
 
 	/**
@@ -63,15 +81,18 @@ public class Sent
 	 */
 	public void setHeader(String header)
 	{
-		this.header = header;
+		processHeader(header);
 	}
 
-	/**
-	 * @return the header
-	 */
-	public String getHeader()
-	{
-		return header;
+	public void processHeader(String header) {
+		Pattern headerPattern = Pattern.compile(Sent.headerRegex);
+		Matcher headerMatcher = headerPattern.matcher(header);
+		while (headerMatcher.find())
+		{
+			id = headerMatcher.group(1);
+			sentence = headerMatcher.group(4);
+		}
+		
 	}
 
 	/**
@@ -95,7 +116,7 @@ public class Sent
 	 * @param parentDocument
 	 *            the parentDocument to set
 	 */
-	public void setParentDocument(int parentDocument)
+	public void setParentDocument(String parentDocument)
 	{
 		this.parentDocument = parentDocument;
 	}
@@ -103,7 +124,7 @@ public class Sent
 	/**
 	 * @return the parentDocument
 	 */
-	public int getParentDocument()
+	public String getParentDocument()
 	{
 		return parentDocument;
 	}
@@ -119,10 +140,10 @@ public class Sent
 		StringBuilder s = new StringBuilder();
 		String newLine = System.getProperty("line.separator");
 
-		s.append("Header: " + header + newLine);
+		s.append("[" + id + "/" + parentDocument + "] " + sentence + newLine);
 		for (Triple triple : triples)
 		{
-			s.append("Triple: " + triple.toString() + newLine);
+			s.append(triple.toString() + newLine);
 		}
 
 		return s.toString();
@@ -140,24 +161,9 @@ public class Sent
 	{
 		Document doc = new Document();
 
-		Pattern headerPattern = Pattern.compile(Sent.headerRegex);
-		Matcher headerMatcher = headerPattern.matcher(header);
-
-		while (headerMatcher.find())
-		{
-			// for(int i=0; i <= headerMatcher.groupCount(); ++i)
-			// {
-			// System.out.println(headerMatcher.group(i));
-			// }
-
-			// headerMatcher.group(0) is the complete sentence header
-			doc.add(new Field(Index.FIELD_ID, headerMatcher.group(1), Field.Store.YES, Field.Index.NOT_ANALYZED));
-			// doc.add(new Field("id", headerMatcher.group(2), Field.Store.YES,
-			// Field.Index.NOT_ANALYZED));
-			doc.add(new Field(Index.FIELD_NRPARSES, headerMatcher.group(3), Field.Store.YES, Field.Index.NOT_ANALYZED));
-			doc.add(new Field(Index.FIELD_SENTENCE, headerMatcher.group(4), Field.Store.YES, Field.Index.ANALYZED)); // NO
-		}
-
+		doc.add(new Field(Index.FIELD_ID, id, Field.Store.YES, Field.Index.NOT_ANALYZED));
+		doc.add(new Field(Index.FIELD_PARENTID, parentDocument, Field.Store.YES, Field.Index.NOT_ANALYZED));
+		doc.add(new Field(Index.FIELD_SENTENCE, sentence, Field.Store.YES, Field.Index.ANALYZED)); // NO
 		doc.add(new Field(Index.FIELD_TRIPLES, triples.toString(), Field.Store.YES, Field.Index.ANALYZED)); // NA
 
 //		log.debug(doc.get("id") + " +++ " + sent.getTriples().toString());

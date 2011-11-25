@@ -50,9 +50,9 @@ public class Index
 	private Directory indexDirectory;
 	
 	public static final String FIELD_ID = "id";
+	public static final String FIELD_PARENTID = "parentId";
 	public static final String FIELD_TRIPLES = "triples";
 	public static final String FIELD_SENTENCE = "sentence";
-	public static final String FIELD_NRPARSES = "nrParses";
 
 	public Index(File indexFile) throws IOException
 	{
