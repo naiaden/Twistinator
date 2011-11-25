@@ -2,10 +2,10 @@ package nl.naiaden.twistinator.indexer;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.Vector;
+
+import nl.naiaden.twistinator.indexer.input.Text;
 
 /**
  * This class is a mapping between parents (Texts) and children (Sents).
@@ -23,14 +23,14 @@ import java.util.Vector;
  *
  */
 public class TextRegister {
-	private Map<String, TreeSet<String>> register = null;
+	private Map<String, Text> register = null;
 	
 	/**
 	 * 
 	 */
 	public TextRegister()
 	{
-		register = Collections.synchronizedMap(new TreeMap<String, TreeSet<String>>());
+		register = Collections.synchronizedMap(new TreeMap<String, Text>());
 	}
 	
 	/**
@@ -60,15 +60,7 @@ public class TextRegister {
 	 */
 	public void add(String textId, TreeSet<String> sentIdsNew)
 	{
-		TreeSet<String> sentIds = (TreeSet<String>) register.get(textId);
-		if(sentIds == null)
-		{
-			sentIds = sentIdsNew;
-		} else
-		{
-			sentIds.addAll(sentIdsNew);
-		}
-		register.put(textId, sentIds);
+		register.get(textId).add(sentIdsNew);
 	}
 	
 	/**
@@ -79,7 +71,7 @@ public class TextRegister {
 	 */
 	public void replace(String textId, TreeSet<String> sentIds)
 	{
-		register.put(textId, sentIds);
+		register.get(textId).replace(sentIds);
 	}
 	
 	/**
@@ -90,13 +82,7 @@ public class TextRegister {
 	 */
 	public void add(String textId, String sentId)
 	{
-		TreeSet<String> sentIds = (TreeSet<String>) register.get(textId);
-		if(sentIds == null)
-		{
-			sentIds = new TreeSet<String>();
-		} 
-		sentIds.add(sentId);
-		register.put(textId, sentIds);
+		register.get(textId).add(sentId);
 	}
 	
 	/**
@@ -107,6 +93,6 @@ public class TextRegister {
 	 */
 	public TreeSet<String> getSentences(String textId)
 	{
-		return (TreeSet<String>) register.get(textId);
+		return register.get(textId).getSentIds();
 	}
 }
