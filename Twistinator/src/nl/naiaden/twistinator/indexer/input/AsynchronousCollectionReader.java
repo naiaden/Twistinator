@@ -7,6 +7,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -100,15 +102,15 @@ public class AsynchronousCollectionReader implements Runnable
 	private void processText(Element textRoot) throws InterruptedException
 	{
 		// iterate through meta data
-//		for(Iterator i = textRoot.elementIterator(); i.hasNext();)
-//		{
-//			Element metaDataRoot = (Element) i.next();
-//			System.out.println(metaDataRoot.attributeValue("id"));
-////			processMetaData(metaDataRoot);
-//		}
+		for(Iterator i = textRoot.elementIterator("metadata"); i.hasNext();)
+		{
+			Element metaDataRoot = (Element) i.next();
+			System.out.println(metaDataRoot.getName());
+			processMetaData(metaDataRoot);
+		}
 		// iterate through sentences (Sents)
 		
-		for(Iterator i = textRoot.elementIterator(); i.hasNext();)
+		for(Iterator i = textRoot.elementIterator("sentences"); i.hasNext();)
 		{
 			Element sentsRoot = (Element) i.next();
 			processSents(sentsRoot, textRoot.attributeValue("id"));
@@ -116,6 +118,23 @@ public class AsynchronousCollectionReader implements Runnable
 		++nrTexts;
 	}
 	
+	private void processMetaData(Element metaDataRoot) {
+		//date
+		Element dateRoot = metaDataRoot.element("date");
+		int year = Integer.parseInt(dateRoot.elementText("year"));
+		int month = Integer.parseInt(dateRoot.elementText("month")) - 1;
+		int day = Integer.parseInt(dateRoot.elementText("day"));
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(year, month, day);
+		Date date = new Date(calendar.getTimeInMillis());
+		
+		//category
+		String category = metaDataRoot.elementText("category");
+		
+		System.out.println(date + " : " + category);
+	}
+
 	/**
 	 * Process the sentences (Sents)
 	 * @param sentsRoot the root node that is the parent of the sentences
