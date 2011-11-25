@@ -1,5 +1,6 @@
 package nl.naiaden.twistinator.indexer;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
@@ -31,6 +32,11 @@ public class TextRegister {
 	public TextRegister()
 	{
 		register = Collections.synchronizedMap(new TreeMap<String, Text>());
+	}
+	
+	public Collection<Text> values()
+	{
+		return register.values();
 	}
 	
 	/**
@@ -82,7 +88,16 @@ public class TextRegister {
 	 */
 	public void add(String textId, String sentId)
 	{
-		register.get(textId).add(sentId);
+		Text text = register.get(textId);
+		if(text == null)
+		{
+			text = new Text(textId);
+			text.add(sentId);
+			register.put(textId, text);
+		} else
+		{
+			text.add(sentId);
+		}
 	}
 	
 	/**

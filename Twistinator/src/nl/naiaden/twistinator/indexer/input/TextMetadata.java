@@ -44,6 +44,11 @@ public class TextMetadata implements Comparable<TextMetadata>
 		this(null, category);
 	}
 
+	public TextMetadata()
+	{
+		this(null, "");
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
@@ -51,5 +56,17 @@ public class TextMetadata implements Comparable<TextMetadata>
 	public int compareTo(TextMetadata rhs)
 	{
 		return date.compareTo(rhs.getDate());
+	}
+	
+	public String toString()
+	{
+		StringBuilder sb = new StringBuilder();
+		
+		if(date == null)
+			sb.append("{" + category + "} - ");
+		else
+			sb.append("{" + category + "} - " + date.toString());
+		
+		return sb.toString();
 	}
 }

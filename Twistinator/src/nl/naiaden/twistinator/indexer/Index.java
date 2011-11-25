@@ -15,6 +15,7 @@ import nl.naiaden.twistinator.indexer.input.AsynchronousCollectionReader;
 import nl.naiaden.twistinator.indexer.input.AsynchronousReader;
 import nl.naiaden.twistinator.indexer.input.AsynchronousSentsReader;
 import nl.naiaden.twistinator.indexer.input.Reader;
+import nl.naiaden.twistinator.indexer.input.Text;
 import nl.naiaden.twistinator.indexer.output.AsynchronousIndexerWriter;
 
 import org.apache.commons.io.FileUtils;
@@ -130,6 +131,12 @@ public class Index
 				writer.optimize();
 				writer.close();
 
+				
+				for(Text text : textRegister.values())
+				{
+					System.out.println(text.toString());
+				}
+				
 				Application.logTiming(log, "Building index took " + (System.nanoTime() - startBuilding) * 1e-9 + " seconds");
 				log.info("Index size: " + FileUtils.byteCountToDisplaySize(FileUtils.sizeOf(indexFile)));
 

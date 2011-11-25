@@ -11,6 +11,13 @@ import java.util.TreeSet;
  */
 public class Text 
 {
+	public Text(String textId)
+	{
+		this.textId = textId;
+		this.metadata = new TextMetadata();
+		this.sentIds = new TreeSet<String>();
+	}
+	
 	/**
 	 * @return the sentIds
 	 */
@@ -94,5 +101,13 @@ public class Text
 		sentIds = sentIdsNew;
 	}
 	
+	public String toString()
+	{
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append("[" + textId + "] " + sentIds.toString() + " " + metadata.toString() );
+		
+		return sb.toString();
+	}
 	
 }
