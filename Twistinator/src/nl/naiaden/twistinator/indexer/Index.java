@@ -12,7 +12,6 @@ import nl.naiaden.twistinator.Application;
 import nl.naiaden.twistinator.analysis.PatternAnalyzer;
 import nl.naiaden.twistinator.indexer.document.Triple;
 import nl.naiaden.twistinator.indexer.input.AsynchronousCollectionReader;
-import nl.naiaden.twistinator.indexer.input.AsynchronousReader;
 import nl.naiaden.twistinator.indexer.input.AsynchronousSentsReader;
 import nl.naiaden.twistinator.indexer.input.Reader;
 import nl.naiaden.twistinator.indexer.input.Text;
