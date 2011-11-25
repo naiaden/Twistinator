@@ -3,14 +3,10 @@
  */
 package nl.naiaden.twistinator.indexer.input;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 import nl.naiaden.twistinator.indexer.document.Triple;
