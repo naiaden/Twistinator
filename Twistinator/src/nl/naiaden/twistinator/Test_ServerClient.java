@@ -3,11 +3,17 @@
  */
 package nl.naiaden.twistinator;
 
+import java.io.File;
+import java.util.concurrent.LinkedBlockingQueue;
+
 import nl.naiaden.twistinator.client.TwistClient;
+import nl.naiaden.twistinator.indexer.input.AsynchronousSentsReader;
+import nl.naiaden.twistinator.indexer.output.AsynchronousIndexerWriter;
 
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.PatternLayout;
+import org.apache.lucene.document.Document;
 
 
 
@@ -49,21 +55,26 @@ public class Test_ServerClient
 		//			}
 		//		};
 
-		final Thread clientThread = new Thread()
-		{
-			@Override
-			public void run()
-			{
-				try
-				{
-					TwistClient.main(args);
-				} catch (final Exception e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		};
+		AsynchronousSentsReader reader = new AsynchronousSentsReader(new File("/home/louis/Desktop/git/Twistinator/Indexer/tinyFile.txt"), new LinkedBlockingQueue<Document>());
+		Thread readerThread = new Thread(reader, "AsyncSentsReader");
+		readerThread.start();
+		
+//		final Thread clientThread = new Thread()
+//		{
+//			@Override
+//			public void run()
+//			{
+//				try
+//				{
+////					TwistClient.main(args);
+//					AsynchronousSentsReader.();
+//				} catch (final Exception e)
+//				{
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//		};
 
 		//		serverThread.start();
 		//		try
@@ -74,8 +85,9 @@ public class Test_ServerClient
 		//			// TODO: handle exception
 		//		}
 
-		clientThread.start();
+//		clientThread.start();
 
+		
 
 
 

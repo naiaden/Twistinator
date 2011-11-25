@@ -11,7 +11,10 @@ import java.util.concurrent.BlockingQueue;
 import nl.naiaden.twistinator.indexer.document.Triple;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
 import org.apache.lucene.document.Document;
 
 /**
@@ -21,6 +24,16 @@ import org.apache.lucene.document.Document;
 public class AsynchronousSentsReader implements Runnable
 {
 	static Logger log = Logger.getLogger(AsynchronousSentsReader.class);
+	
+	static
+	{
+		final org.apache.log4j.Logger rootLogger = org.apache.log4j.Logger.getRootLogger();
+		if (!rootLogger.getAllAppenders().hasMoreElements())
+		{
+			rootLogger.setLevel(Level.DEBUG);
+			rootLogger.addAppender(new ConsoleAppender(new PatternLayout("%d{ABSOLUTE} [%-11t] %x %-5p %c{1} - %m%n")));
+		}
+	}
 	
 	private BlockingQueue<Document> documentQueue;
 	private File file;

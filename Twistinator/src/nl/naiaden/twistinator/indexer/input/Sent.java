@@ -72,7 +72,7 @@ public class Sent
 		this.id = null;
 		this.sentence = null;
 		this.triples = new Triples();
-		this.parentDocument = null;
+		this.parentDocument = "";
 	}
 
 	/**
