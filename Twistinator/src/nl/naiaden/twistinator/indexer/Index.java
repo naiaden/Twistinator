@@ -11,7 +11,10 @@ import java.util.regex.Pattern;
 import nl.naiaden.twistinator.Application;
 import nl.naiaden.twistinator.analysis.PatternAnalyzer;
 import nl.naiaden.twistinator.indexer.document.Triple;
+import nl.naiaden.twistinator.indexer.input.AsynchronousCollectionReader;
+import nl.naiaden.twistinator.indexer.input.AsynchronousReader;
 import nl.naiaden.twistinator.indexer.input.AsynchronousSentsReader;
+import nl.naiaden.twistinator.indexer.input.Reader;
 import nl.naiaden.twistinator.indexer.output.AsynchronousIndexerWriter;
 
 import org.apache.commons.io.FileUtils;
@@ -48,16 +51,19 @@ public class Index
 
 	private File indexFile;
 	private Directory indexDirectory;
+	private TextRegister textRegister;
+	private Class<? extends Reader> readerClass;
 	
 	public static final String FIELD_ID = "id";
 	public static final String FIELD_PARENTID = "parentId";
 	public static final String FIELD_TRIPLES = "triples";
 	public static final String FIELD_SENTENCE = "sentence";
 
-	public Index(File indexFile) throws IOException
+	public Index(File indexFile, Class<? extends Reader> reader) throws IOException
 	{
 		this.indexFile = indexFile;
 		indexDirectory = FSDirectory.open(indexFile);
+		readerClass = reader;
 	}
 
 	public void addToIndex(File inputFile)
@@ -80,8 +86,16 @@ public class Index
 			IndexWriter indexWriter = new IndexWriter(indexDirectory, indexWriterConfig);
 
 			LinkedBlockingQueue<Document> queue = new LinkedBlockingQueue<Document>(10000);
-
-			AsynchronousSentsReader reader = new AsynchronousSentsReader(inputFile, queue);
+			
+			Reader reader = null;
+			if(readerClass.equals(AsynchronousSentsReader.class))
+			{
+				reader = new AsynchronousSentsReader(inputFile, queue);
+			} else if(readerClass.equals(AsynchronousCollectionReader.class))
+			{
+				reader = new AsynchronousCollectionReader(inputFile, queue);
+			}
+			
 			Thread readerThread = new Thread(reader, "AsynReader");
 			readerThread.start();
 
@@ -102,6 +116,8 @@ public class Index
 			try
 			{
 				readerThread.join();
+				textRegister = reader.getTextRegister();
+				log.info(textRegister.size() + " documents!");
 				writer.keepRunning = false;
 				//				writer1.keepRunning = false;
 				//				writer2.keepRunning = false;
@@ -145,6 +161,8 @@ public class Index
 	{
 		try
 		{
+			textRegister = new TextRegister();
+			
 			if(indexFile.exists())
 			{
 				log.info("Removing index: " + indexFile.getAbsolutePath());

@@ -34,6 +34,25 @@ public class TextRegister {
 	}
 	
 	/**
+	 * Number of Texts in the register
+	 * @return
+	 */
+	public int size()
+	{
+		return register.size();
+	}
+	
+	/**
+	 * Number of Sents for a Text
+	 * @param textId the id of the document
+	 * @return the number of sentences in the document
+	 */
+	public int size(String textId)
+	{
+		return register.get(textId).size();
+	}
+	
+	/**
 	 * Add the sentence ids to the Text id. Only unique sentence identifiers
 	 * are stored.
 	 * @param textId the id of the document
@@ -72,6 +91,10 @@ public class TextRegister {
 	public void add(String textId, String sentId)
 	{
 		TreeSet<String> sentIds = (TreeSet<String>) register.get(textId);
+		if(sentIds == null)
+		{
+			sentIds = new TreeSet<String>();
+		} 
 		sentIds.add(sentId);
 		register.put(textId, sentIds);
 	}

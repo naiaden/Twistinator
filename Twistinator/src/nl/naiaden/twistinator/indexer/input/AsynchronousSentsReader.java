@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.concurrent.BlockingQueue;
 
+import nl.naiaden.twistinator.indexer.TextRegister;
 import nl.naiaden.twistinator.indexer.document.Triple;
 
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +22,7 @@ import org.apache.lucene.document.Document;
  * @author louis
  *
  */
-public class AsynchronousSentsReader implements Runnable
+public class AsynchronousSentsReader implements Reader
 {
 	static Logger log = Logger.getLogger(AsynchronousSentsReader.class);
 	
@@ -36,6 +37,8 @@ public class AsynchronousSentsReader implements Runnable
 	}
 	
 	private BlockingQueue<Document> documentQueue;
+	private TextRegister textRegister = new TextRegister();
+	
 	private File file;
 
 	public boolean keepRunning = true;
@@ -45,10 +48,17 @@ public class AsynchronousSentsReader implements Runnable
 	
 	public AsynchronousSentsReader(File file, BlockingQueue<Document> documentQueue)
 	{
+		super();
 		this.file = file;
 		this.documentQueue = documentQueue;
+		textRegister = new TextRegister();
 	}
 
+	public TextRegister getTextRegister()
+	{
+		return textRegister;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Runnable#run()
@@ -78,11 +88,12 @@ public class AsynchronousSentsReader implements Runnable
 					{
 						Document d = sent.toDocument();
 						documentQueue.put(d);
+						textRegister.add(d.get("parentId"), d.get("id"));
 						if(++nrDocs % 10000 == 0)
 						{
 							log.info("AsyncReader: " + nrDocs);
 						}
-//						log.debug(d.get("id") + " >>> " + d.get("sentence"));
+						log.debug(d.get("id") + " >>> " + d.get("sentence"));
 						sent = new Sent();
 						sent.setHeader(bufferedLine);
 					} else if (!bufferedLine.startsWith("# Error:") && !bufferedLine.startsWith("UNKN:"))
@@ -93,8 +104,10 @@ public class AsynchronousSentsReader implements Runnable
 			}
 
 			Document d = sent.toDocument();
-			documentQueue.put(d); ++nrDocs;
-//			log.debug(d.get("id") + " >>> " + d.get("sentence"));
+			documentQueue.put(d); 
+			textRegister.add(d.get("parentId"), d.get("id"));
+			++nrDocs;
+			log.debug(d.get("id") + " >>> " + d.get("sentence"));
 			log.info("--- Asynchronous Sents Reader");		
 			
 		}

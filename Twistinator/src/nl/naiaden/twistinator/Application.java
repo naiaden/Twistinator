@@ -6,6 +6,8 @@ package nl.naiaden.twistinator;
 import java.io.File;
 
 import nl.naiaden.twistinator.indexer.Index;
+import nl.naiaden.twistinator.indexer.input.AsynchronousCollectionReader;
+import nl.naiaden.twistinator.indexer.input.AsynchronousSentsReader;
 
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
@@ -85,7 +87,7 @@ public class Application
 
 		try
 		{
-			Index index = new Index(new File((String) applicationContext.getVariable("index")));
+			Index index = new Index(new File((String) applicationContext.getVariable("index")), AsynchronousSentsReader.class);
 			File file;
 
 			switch (applicationContext.getMode())

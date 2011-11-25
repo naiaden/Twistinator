@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 
+import nl.naiaden.twistinator.indexer.TextRegister;
 import nl.naiaden.twistinator.indexer.document.Triple;
 import nl.naiaden.twistinator.indexer.document.Triples;
 
@@ -25,7 +26,7 @@ import org.dom4j.io.SAXReader;
  * @author louis
  *
  */
-public class AsynchronousCollectionReader implements Runnable
+public class AsynchronousCollectionReader implements Reader
 {
 	static Logger log = Logger.getLogger(AsynchronousCollectionReader.class);
 	
@@ -168,5 +169,15 @@ public class AsynchronousCollectionReader implements Runnable
 		
 		documentQueue.put(sent.toDocument()); 
 		++nrDocs;
+	}
+
+	/* (non-Javadoc)
+	 * @see nl.naiaden.twistinator.indexer.input.Reader#getTextRegister()
+	 */
+	@Override
+	public TextRegister getTextRegister()
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
