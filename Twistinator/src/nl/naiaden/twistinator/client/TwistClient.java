@@ -39,7 +39,6 @@ public class TwistClient
 		// Parse options.
 		final String host = "localhost";
 		final int port = 8123;
-		final int firstMessageSize = 256;
 
 
 		// Configure the client.

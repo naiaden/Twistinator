@@ -4,7 +4,6 @@
 package nl.naiaden.twistinator.indexer.input;
 
 import java.io.File;
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 
 import org.apache.lucene.document.Document;

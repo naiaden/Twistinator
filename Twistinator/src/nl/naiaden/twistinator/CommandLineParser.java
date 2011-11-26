@@ -153,8 +153,8 @@ public class CommandLineParser
 		indexOptionGroup.addOption(OptionBuilder.hasArg(true).withArgName("index").withLongOpt("delete").withDescription("delete an index").create("d"));
 		indexOptionGroup.addOption(OptionBuilder.hasArg(true).withArgName("index").withLongOpt("search").withDescription("search the index").create("s"));
 		cmdLineOptions.addOptionGroup(indexOptionGroup);
-		cmdLineOptions.addOption(OptionBuilder.hasArg(true).withArgName("reader").withDescription("type of input reader (asynchronous collection reader or asynchronous sents reader)").create("reader"));
-		cmdLineOptions.addOption(OptionBuilder.hasArg(true).withArgName("writer").withDescription("type of index writer (currently only asynchronous index writer is available)").create("writer"));
+		cmdLineOptions.addOption(OptionBuilder.hasArg(true).withArgName("reader").withDescription("type of input reader (AsynchronousCollectionReader or AsynchronousSentsReader)").create("reader"));
+		cmdLineOptions.addOption(OptionBuilder.hasArg(true).withArgName("writer").withDescription("type of index writer (currently only AsynchronousIndexWriter is available)").create("writer"));
 
 		// Searching
 		OptionGroup searchOptionGroup = new OptionGroup();

@@ -283,7 +283,7 @@ public final class PatternAnalyzer extends Analyzer
 	 */
 	public static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+");
 
-	private static final CharArraySet EXTENDED_ENGLISH_STOP_WORDS = CharArraySet.unmodifiableSet(new CharArraySet(Version.LUCENE_CURRENT, Arrays.asList("a", "about", "above",
+	private static final CharArraySet EXTENDED_ENGLISH_STOP_WORDS = CharArraySet.unmodifiableSet(new CharArraySet(Version.LUCENE_34, Arrays.asList("a", "about", "above",
 			"across", "adj", "after", "afterwards", "again", "against", "albeit", "all", "almost", "alone", "along", "already", "also", "although", "always", "among", "amongst",
 			"an", "and", "another", "any", "anyhow", "anyone", "anything", "anywhere", "are", "around", "as", "at", "be", "became", "because", "become", "becomes", "becoming",
 			"been", "before", "beforehand", "behind", "being", "below", "beside", "besides", "between", "beyond", "both", "but", "by", "can", "cannot", "co", "could", "down",
@@ -304,7 +304,7 @@ public final class PatternAnalyzer extends Analyzer
 	 * A lower-casing word analyzer with English stop words (can be shared
 	 * freely across threads without harm); global per class loader.
 	 */
-	public static final PatternAnalyzer DEFAULT_ANALYZER = new PatternAnalyzer(Version.LUCENE_CURRENT, NON_WORD_PATTERN, true, StopAnalyzer.ENGLISH_STOP_WORDS_SET);
+	public static final PatternAnalyzer DEFAULT_ANALYZER = new PatternAnalyzer(Version.LUCENE_34, NON_WORD_PATTERN, true, StopAnalyzer.ENGLISH_STOP_WORDS_SET);
 	/**
 	 * A lower-casing word analyzer with <b>extended </b> English stop words
 	 * (can be shared freely across threads without harm); global per class
@@ -312,7 +312,7 @@ public final class PatternAnalyzer extends Analyzer
 	 * http://thomas.loc.gov/home/stopwords.html, see
 	 * http://thomas.loc.gov/home/all.about.inquery.html
 	 */
-	public static final PatternAnalyzer EXTENDED_ANALYZER = new PatternAnalyzer(Version.LUCENE_CURRENT, NON_WORD_PATTERN, true, EXTENDED_ENGLISH_STOP_WORDS);
+	public static final PatternAnalyzer EXTENDED_ANALYZER = new PatternAnalyzer(Version.LUCENE_34, NON_WORD_PATTERN, true, EXTENDED_ENGLISH_STOP_WORDS);
 
 	/** equality where o1 and/or o2 can be null */
 	private static boolean eq(Object o1, Object o2)

@@ -66,7 +66,6 @@ public class Triples implements Iterable<Triple>
         return old;    
     }
 
-    @SuppressWarnings("unchecked")
     public void ensureCapacity( int newCapacity )
     {
         if( newCapacity < theSize )
