@@ -66,18 +66,8 @@ public class AsynchronousCollectionReader implements Reader
 {
 	static Logger log = Logger.getLogger(AsynchronousCollectionReader.class);
 	
-	static
-	{
-		final org.apache.log4j.Logger rootLogger = org.apache.log4j.Logger.getRootLogger();
-		if (!rootLogger.getAllAppenders().hasMoreElements())
-		{
-			rootLogger.setLevel(Level.DEBUG);
-			rootLogger.addAppender(new ConsoleAppender(new PatternLayout("%d{ABSOLUTE} [%-11t] %x %-5p %c{1} - %m%n")));
-		}
-	}
-	
 	private BlockingQueue<Document> documentQueue;
-	private TextRegister textRegister = new TextRegister();
+	private TextRegister textRegister = null;
 	
 	private File file;
 	
@@ -122,8 +112,10 @@ public class AsynchronousCollectionReader implements Reader
 	 */
 	public AsynchronousCollectionReader(File file, BlockingQueue<Document> documentQueue)
 	{
+		super();
 		this.file = file;
 		this.documentQueue = documentQueue;
+		textRegister = new TextRegister();
 	}
 	
 	/* 

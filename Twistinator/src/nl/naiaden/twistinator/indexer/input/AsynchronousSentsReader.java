@@ -26,26 +26,50 @@ public class AsynchronousSentsReader implements Reader
 {
 	static Logger log = Logger.getLogger(AsynchronousSentsReader.class);
 	
-	static
-	{
-		final org.apache.log4j.Logger rootLogger = org.apache.log4j.Logger.getRootLogger();
-		if (!rootLogger.getAllAppenders().hasMoreElements())
-		{
-			rootLogger.setLevel(Level.DEBUG);
-			rootLogger.addAppender(new ConsoleAppender(new PatternLayout("%d{ABSOLUTE} [%-11t] %x %-5p %c{1} - %m%n")));
-		}
-	}
-	
 	private BlockingQueue<Document> documentQueue;
-	private TextRegister textRegister = new TextRegister();
+	private TextRegister textRegister = null;
 	
 	private File file;
 
+	/**
+	 * 
+	 */
 	public boolean keepRunning = true;
+	/**
+	 * 
+	 */
 	public boolean isRunning = true;
 	
-	public long nrDocs = 0;
+	/**
+	 * Number of sentences read so far
+	 */
+	private long nrDocs = 0;
+	/**
+	 * Number of texts read so far
+	 */
+	private long nrTexts = 0;
 	
+	/**
+	 * @return the nrDocs
+	 */
+	public long getNrDocs()
+	{
+		return this.nrDocs;
+	}
+
+	/**
+	 * @return the nrTexts
+	 */
+	public long getNrTexts()
+	{
+		return this.nrTexts;
+	}
+	
+	/**
+	 * Creates an asynchronous sents reader
+	 * @param file the that contains the documents
+	 * @param documentQueue the queue that holds the sentences
+	 */
 	public AsynchronousSentsReader(File file, BlockingQueue<Document> documentQueue)
 	{
 		super();
