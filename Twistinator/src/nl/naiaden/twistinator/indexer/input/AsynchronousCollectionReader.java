@@ -23,6 +23,42 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
 /**
+ * This reader reads collections asynchronously.
+ * 
+ * The input are xml collection files with the following layout:
+ * <pre>
+ * {@code
+ * <documents>
+ *    <document id="DOC1">
+ *       <metadata>
+ *          <date>
+ *             <year>2011</year>
+ *             <month>11</month>
+ *             <day>26</day>
+ *          </date>
+ *          <category>medical</category>
+ *       </metadata>
+ *       <sentences>
+ *          <sentence id="1">
+ *             <sent>This is an example sentence</sent>
+ *             <triples>
+ *                <triple>[example,DET,an]</triple>
+ *                <triple>[this,SUBJ,is]</triple>
+ *             </triples>
+ *          </sentence>
+ *       </sentences>
+ *    </document>
+ * </documents>
+ * }
+ * </pre>
+ * The identifiers are strings, and mandatory. It is the task of the user to
+ * make sure the identifiers are unique, since these values are used internally.
+ * 
+ * <p>
+ * The files are processed asynchronously. Because writing the files to the index
+ * is usually a slower task, we can use the asynchronicity to have multiple index
+ * writers perform the task.
+ * 
  * @author louis
  *
  */
@@ -41,21 +77,57 @@ public class AsynchronousCollectionReader implements Reader
 	}
 	
 	private BlockingQueue<Document> documentQueue;
+	private TextRegister textRegister = new TextRegister();
+	
 	private File file;
 	
+	/**
+	 * 
+	 */
 	public boolean keepRunning = true;
+	/**
+	 * 
+	 */
 	public boolean isRunning = true;
 	
-	public long nrDocs = 0;
-	public long nrTexts = 0;
+	/**
+	 * Number of sentences read so far
+	 */
+	private long nrDocs = 0;
+	/**
+	 * Number of texts read so far
+	 */
+	private long nrTexts = 0;
 	
+	/**
+	 * @return the nrDocs
+	 */
+	public long getNrDocs()
+	{
+		return this.nrDocs;
+	}
+
+	/**
+	 * @return the nrTexts
+	 */
+	public long getNrTexts()
+	{
+		return this.nrTexts;
+	}
+
+	/**
+	 * Creates an asynchronous collection reader
+	 * @param file the that contains the documents
+	 * @param documentQueue the queue that holds the sentences
+	 */
 	public AsynchronousCollectionReader(File file, BlockingQueue<Document> documentQueue)
 	{
 		this.file = file;
 		this.documentQueue = documentQueue;
 	}
 	
-	/* (non-Javadoc)
+	/* 
+	 * (non-Javadoc)
 	 * @see java.lang.Runnable#run()
 	 */
 	@Override
@@ -93,29 +165,30 @@ public class AsynchronousCollectionReader implements Reader
 	
 	/**
 	 * Process the document (Text). A document consists of its meta data and sentences
-	 * @param textRoot
+	 * @param textRoot the root node that is parent of the document
 	 * @throws InterruptedException
 	 */
 	private void processText(Element textRoot) throws InterruptedException
 	{
-		// iterate through meta data
-		for(Iterator i = textRoot.elementIterator("metadata"); i.hasNext();)
-		{
-			Element metaDataRoot = (Element) i.next();
-			System.out.println(metaDataRoot.getName());
-			processMetaData(metaDataRoot);
-		}
-		// iterate through sentences (Sents)
+		String textId = textRoot.attributeValue("id");
 		
-		for(Iterator i = textRoot.elementIterator("sentences"); i.hasNext();)
-		{
-			Element sentsRoot = (Element) i.next();
-			processSents(sentsRoot, textRoot.attributeValue("id"));
-		}
+		// iterate through meta data
+		TextMetadata metadata = processMetaData(textRoot.element("metadata"));
+		
+		// iterate through sentences (Sents)
+		processSents(textRoot.element("sentences"), textId);
+		
+		textRegister.add(textId, new Text(textId, metadata));
 		++nrTexts;
 	}
 	
-	private void processMetaData(Element metaDataRoot) {
+	/**
+	 * Process the metadata for the document. The metadata consists of a date
+	 * and a category
+	 * @param metaDataRoot the root node that is parent of the metadata
+	 * @return the metadata
+	 */
+	private TextMetadata processMetaData(Element metaDataRoot) {
 		//date
 		Element dateRoot = metaDataRoot.element("date");
 		int year = Integer.parseInt(dateRoot.elementText("year"));
@@ -129,12 +202,13 @@ public class AsynchronousCollectionReader implements Reader
 		//category
 		String category = metaDataRoot.elementText("category");
 		
-		System.out.println(date + " : " + category);
+		return new TextMetadata(date, category);
 	}
 
 	/**
 	 * Process the sentences (Sents)
 	 * @param sentsRoot the root node that is the parent of the sentences
+	 * @param textId the id of the parent document
 	 * @throws InterruptedException
 	 */
 	private void processSents(Element sentsRoot, String textId) throws InterruptedException
@@ -148,7 +222,8 @@ public class AsynchronousCollectionReader implements Reader
 	
 	/**
 	 * Process the sentence (Document)
-	 * @param sentRoot
+	 * @param sentRoot the root node that is parent of the sentence
+	 * @param textId the id of the parent document
 	 * @throws InterruptedException
 	 */
 	private void processSent(Element sentRoot, String textId) throws InterruptedException
@@ -167,7 +242,8 @@ public class AsynchronousCollectionReader implements Reader
 		
 		Sent sent = new Sent(sentId, sentence, triples, textId);
 		
-		documentQueue.put(sent.toDocument()); 
+		documentQueue.put(sent.toDocument());
+		textRegister.add(textId, sentId);
 		++nrDocs;
 	}
 
@@ -177,7 +253,6 @@ public class AsynchronousCollectionReader implements Reader
 	@Override
 	public TextRegister getTextRegister()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return textRegister;
 	}
 }

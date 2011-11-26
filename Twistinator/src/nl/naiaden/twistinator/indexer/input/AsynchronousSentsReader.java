@@ -54,6 +54,10 @@ public class AsynchronousSentsReader implements Reader
 		textRegister = new TextRegister();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see nl.naiaden.twistinator.indexer.input.Reader#getTextRegister()
+	 */
 	public TextRegister getTextRegister()
 	{
 		return textRegister;

@@ -58,6 +58,11 @@ public class TextRegister {
 		return register.get(textId).size();
 	}
 	
+	public void add(String textId, Text text)
+	{
+		register.put(textId, text);
+	}
+	
 	/**
 	 * Add the sentence ids to the Text id. Only unique sentence identifiers
 	 * are stored.
@@ -77,7 +82,21 @@ public class TextRegister {
 	 */
 	public void replace(String textId, TreeSet<String> sentIds)
 	{
-		register.get(textId).replace(sentIds);
+		if(register.containsKey(textId))
+		{
+			register.get(textId).replace(sentIds);
+		}
+	}
+	
+	/**
+	 * Returns true if the register contains a mapping for the specified key
+	 * @param textId the key
+	 * @return true if the register contains a mapping for the specified key,
+	 * false otherwise
+	 */
+	public boolean contains(String textId)
+	{
+		return register.containsKey(textId);
 	}
 	
 	/**

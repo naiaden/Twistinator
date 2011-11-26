@@ -13,9 +13,19 @@ public class Text
 {
 	public Text(String textId)
 	{
+		this(textId, new TextMetadata());
+	}
+	
+	public Text(String textId, TextMetadata metadata)
+	{
+		this(textId, metadata, new TreeSet<String>());
+	}
+	
+	public Text(String textId, TextMetadata metadata, TreeSet<String> sentIds)
+	{
 		this.textId = textId;
-		this.metadata = new TextMetadata();
-		this.sentIds = new TreeSet<String>();
+		this.metadata = metadata;
+		this.sentIds = sentIds;
 	}
 	
 	/**
