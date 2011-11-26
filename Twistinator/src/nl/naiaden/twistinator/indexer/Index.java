@@ -14,6 +14,7 @@ import nl.naiaden.twistinator.indexer.document.Triple;
 import nl.naiaden.twistinator.indexer.input.AsynchronousCollectionReader;
 import nl.naiaden.twistinator.indexer.input.AsynchronousSentsReader;
 import nl.naiaden.twistinator.indexer.input.Reader;
+import nl.naiaden.twistinator.indexer.input.ReaderFactory;
 import nl.naiaden.twistinator.indexer.input.Text;
 import nl.naiaden.twistinator.indexer.output.AsynchronousIndexerWriter;
 
@@ -40,6 +41,8 @@ import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+
+import com.sun.org.apache.regexp.internal.ReaderCharacterIterator;
 
 /**
  * @author louis
@@ -87,15 +90,7 @@ public class Index
 
 			LinkedBlockingQueue<Document> queue = new LinkedBlockingQueue<Document>(10000);
 			
-			Reader reader = null;
-			if(readerClass.equals(AsynchronousSentsReader.class))
-			{
-				reader = new AsynchronousSentsReader(inputFile, queue);
-			} else if(readerClass.equals(AsynchronousCollectionReader.class))
-			{
-				reader = new AsynchronousCollectionReader(inputFile, queue);
-			}
-			
+			Reader reader = ReaderFactory.create(readerClass, inputFile, queue);			
 			Thread readerThread = new Thread(reader, "AsynReader");
 			readerThread.start();
 
