@@ -12,10 +12,7 @@ import nl.naiaden.twistinator.indexer.TextRegister;
 import nl.naiaden.twistinator.indexer.document.Triple;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
 import org.apache.lucene.document.Document;
 
 /**
@@ -97,51 +94,50 @@ public class AsynchronousSentsReader implements Reader
 		
 		try
 		{
-
-		FileReader fileReader = new FileReader(file);
-		BufferedReader bufferedReader = new BufferedReader(fileReader);
-		String bufferedLine = bufferedReader.readLine();
-
-		Sent sent = new Sent();
-
-		if (bufferedLine.startsWith("# (null)"))
-		{
-			sent.setHeader(bufferedLine);
-
-			while ((bufferedLine = bufferedReader.readLine()) != null)
+			FileReader fileReader = new FileReader(file);
+			BufferedReader bufferedReader = new BufferedReader(fileReader);
+			String bufferedLine = bufferedReader.readLine();
+	
+			Sent sent = new Sent();
+	
+			if (bufferedLine.startsWith("# (null)"))
 			{
-				if (!StringUtils.isBlank(bufferedLine))
+				sent.setHeader(bufferedLine);
+	
+				while ((bufferedLine = bufferedReader.readLine()) != null)
 				{
-					if (bufferedLine.startsWith("# (null)"))
+					if (!StringUtils.isBlank(bufferedLine))
 					{
-						Document d = sent.toDocument();
-						documentQueue.put(d);
-						textRegister.add(d.get("parentId"), d.get("id"));
-						if(++nrDocs % 10000 == 0)
+						if (bufferedLine.startsWith("# (null)"))
 						{
-							log.info("AsyncReader: " + nrDocs);
+							Document d = sent.toDocument();
+							documentQueue.put(d);
+							textRegister.add(d.get("parentId"), d.get("id"));
+							if(++nrDocs % 10000 == 0)
+							{
+								log.info("AsyncReader: " + nrDocs);
+							}
+							log.debug(d.get("id") + " >>> " + d.get("sentence"));
+							sent = new Sent();
+							sent.setHeader(bufferedLine);
+						} else if (!bufferedLine.startsWith("# Error:") && !bufferedLine.startsWith("UNKN:"))
+						{
+							sent.addTriple(new Triple(bufferedLine));
 						}
-						log.debug(d.get("id") + " >>> " + d.get("sentence"));
-						sent = new Sent();
-						sent.setHeader(bufferedLine);
-					} else if (!bufferedLine.startsWith("# Error:") && !bufferedLine.startsWith("UNKN:"))
-					{
-						sent.addTriple(new Triple(bufferedLine));
 					}
 				}
+	
+				Document d = sent.toDocument();
+				documentQueue.put(d); 
+				textRegister.add(d.get("parentId"), d.get("id"));
+				++nrDocs;
+				log.debug(d.get("id") + " >>> " + d.get("sentence"));
+				log.info("--- Asynchronous Sents Reader");		
+				
 			}
-
-			Document d = sent.toDocument();
-			documentQueue.put(d); 
-			textRegister.add(d.get("parentId"), d.get("id"));
-			++nrDocs;
-			log.debug(d.get("id") + " >>> " + d.get("sentence"));
-			log.info("--- Asynchronous Sents Reader");		
-			
-		}
-
-		bufferedReader.close();
-		isRunning = false;
+	
+			bufferedReader.close();
+			isRunning = false;
 		} catch(Exception e)
 		{
 			e.printStackTrace();

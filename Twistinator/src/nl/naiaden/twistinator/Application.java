@@ -6,8 +6,7 @@ package nl.naiaden.twistinator;
 import java.io.File;
 
 import nl.naiaden.twistinator.indexer.Index;
-import nl.naiaden.twistinator.indexer.input.AsynchronousCollectionReader;
-import nl.naiaden.twistinator.indexer.input.AsynchronousSentsReader;
+import nl.naiaden.twistinator.indexer.input.ReaderFactory;
 
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
@@ -23,7 +22,7 @@ public class Application
 {
 	public static String applicationName = "Twistinator";
 
-	public static String ApplicationVersion = "0.1";
+	public static String ApplicationVersion = "0.3";
 
 	private static ApplicationContext applicationContext;
 
@@ -87,13 +86,17 @@ public class Application
 
 		try
 		{
-			Index index = new Index(new File((String) applicationContext.getVariable("index")), AsynchronousSentsReader.class);
+			Index index = new Index(new File((String) applicationContext.getVariable("index")));
 			File file;
 
 			switch (applicationContext.getMode())
 			{
 			case create:
 				file = new File((String) applicationContext.getVariable("file"));
+				if(!applicationContext.getVariableValue("reader").isEmpty())
+				{
+					index.setReader(ReaderFactory.toClass(applicationContext.getVariableValue("reader")));
+				}
 				index.createIndex(file);
 				break;
 			case add:

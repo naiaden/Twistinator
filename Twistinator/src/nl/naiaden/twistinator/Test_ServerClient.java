@@ -5,17 +5,11 @@ package nl.naiaden.twistinator;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.LinkedBlockingQueue;
-
-import nl.naiaden.twistinator.client.TwistClient;
 import nl.naiaden.twistinator.indexer.Index;
 import nl.naiaden.twistinator.indexer.input.AsynchronousSentsReader;
-import nl.naiaden.twistinator.indexer.output.AsynchronousIndexerWriter;
-
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.PatternLayout;
-import org.apache.lucene.document.Document;
 
 
 

@@ -29,6 +29,21 @@ public abstract class ReaderFactory
 		new ClassNotFoundException("Cannot create for: " + readerClass.toString());
 		return null;
 	}
+	
+	public static Class<? extends Reader> toClass(String className)
+	{
+		if(className.equals(AsynchronousCollectionReader.class.getName()))
+		{
+			return AsynchronousCollectionReader.class;
+		}
+		if(className.equals(AsynchronousSentsReader.class.getName()))
+		{
+			return AsynchronousSentsReader.class;
+		}
+		
+		new ClassNotFoundException("Cannot cast '" + className + "' to a Reader");
+		return null;
+	}
 }
 
 

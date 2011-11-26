@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 import nl.naiaden.twistinator.Application;
 import nl.naiaden.twistinator.analysis.PatternAnalyzer;
 import nl.naiaden.twistinator.indexer.document.Triple;
-import nl.naiaden.twistinator.indexer.input.AsynchronousCollectionReader;
 import nl.naiaden.twistinator.indexer.input.AsynchronousSentsReader;
 import nl.naiaden.twistinator.indexer.input.Reader;
 import nl.naiaden.twistinator.indexer.input.ReaderFactory;
@@ -42,8 +41,6 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
-import com.sun.org.apache.regexp.internal.ReaderCharacterIterator;
-
 /**
  * @author louis
  * 
@@ -56,19 +53,49 @@ public class Index
 	private Directory indexDirectory;
 	private TextRegister textRegister;
 	private Class<? extends Reader> readerClass;
+	private Class<?> writerClass;
 	
 	public static final String FIELD_ID = "id";
 	public static final String FIELD_PARENTID = "parentId";
 	public static final String FIELD_TRIPLES = "triples";
 	public static final String FIELD_SENTENCE = "sentence";
 
+	public Index(File indexFile) throws IOException
+	{
+		this(indexFile, AsynchronousSentsReader.class);
+	}
+	
 	public Index(File indexFile, Class<? extends Reader> reader) throws IOException
+	{
+		this(indexFile, reader, AsynchronousIndexerWriter.class);
+	}
+
+	public Index(File indexFile, Class<? extends Reader> reader, Class<?> writer) throws IOException
 	{
 		this.indexFile = indexFile;
 		indexDirectory = FSDirectory.open(indexFile);
 		readerClass = reader;
+		writerClass = writer;
 	}
-
+	
+	/**
+	 * Set the type of index writer
+	 * @param writer the index writer class
+	 */
+	public void setWriter(Class<?> writer)
+	{
+		writerClass = writer;
+	}
+	
+	/**
+	 * Set the type of input reader
+	 * @param reader the input reader class
+	 */
+	public void setReader(Class<? extends Reader> reader)
+	{
+		readerClass = reader;
+	}
+	
 	public void addToIndex(File inputFile)
 	{
 		try

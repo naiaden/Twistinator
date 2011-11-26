@@ -24,7 +24,7 @@ public class ApplicationContext
 	private ApplicationMode mode = ApplicationMode.search;;
 	private Triple triple;
 	
-	private Map variables = new Hashtable();
+	private Map<String, Object> variables = new Hashtable<String, Object>();
 	private String word;
 	
 	public ApplicationMode getMode()
@@ -40,6 +40,11 @@ public class ApplicationContext
 	public Object getVariable(String name)
 	{
 		return variables.get(name);
+	}
+	
+	public String getVariableValue(String name)
+	{
+		return (String) variables.get(name);
 	}
 	
 	public String getWord()

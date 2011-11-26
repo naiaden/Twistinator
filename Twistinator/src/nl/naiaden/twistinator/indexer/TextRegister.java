@@ -58,6 +58,11 @@ public class TextRegister {
 		return register.get(textId).size();
 	}
 	
+	/**
+	 * Create a mapping between document id and the document
+	 * @param textId the document id
+	 * @param text the document
+	 */
 	public void add(String textId, Text text)
 	{
 		register.put(textId, text);
@@ -82,7 +87,7 @@ public class TextRegister {
 	 */
 	public void replace(String textId, TreeSet<String> sentIds)
 	{
-		if(register.containsKey(textId))
+		if(contains(textId))
 		{
 			register.get(textId).replace(sentIds);
 		}
@@ -107,15 +112,14 @@ public class TextRegister {
 	 */
 	public void add(String textId, String sentId)
 	{
-		Text text = register.get(textId);
-		if(text == null)
+		if(contains(textId))
 		{
-			text = new Text(textId);
+			Text text = new Text(textId);
 			text.add(sentId);
 			register.put(textId, text);
 		} else
 		{
-			text.add(sentId);
+			register.get(textId).add(sentId);
 		}
 	}
 	
@@ -127,6 +131,10 @@ public class TextRegister {
 	 */
 	public TreeSet<String> getSentences(String textId)
 	{
-		return register.get(textId).getSentIds();
+		if(contains(textId))
+		{
+			register.get(textId).getSentIds();
+		}
+		return null;
 	}
 }

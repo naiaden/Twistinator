@@ -13,10 +13,7 @@ import nl.naiaden.twistinator.indexer.TextRegister;
 import nl.naiaden.twistinator.indexer.document.Triple;
 import nl.naiaden.twistinator.indexer.document.Triples;
 
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
 import org.apache.lucene.document.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
@@ -136,7 +133,7 @@ public class AsynchronousCollectionReader implements Reader
 			Element root = document.getRootElement();
 			
 			// iterate through documents (Texts)
-			for(Iterator i = root.elementIterator(); i.hasNext(); )
+			for(Iterator<?> i = root.elementIterator(); i.hasNext(); )
 			{
 				Element textRoot = (Element) i.next();
 				processText(textRoot);
@@ -205,7 +202,7 @@ public class AsynchronousCollectionReader implements Reader
 	 */
 	private void processSents(Element sentsRoot, String textId) throws InterruptedException
 	{
-		for(Iterator i = sentsRoot.elementIterator(); i.hasNext();)
+		for(Iterator<?> i = sentsRoot.elementIterator(); i.hasNext();)
 		{
 			Element sentRoot = (Element) i.next();
 			processSent(sentRoot, textId);
@@ -226,7 +223,7 @@ public class AsynchronousCollectionReader implements Reader
 		
 		Element triplesRoot = sentRoot.element("triples");
 		
-		for(Iterator i = triplesRoot.elementIterator(); i.hasNext();)
+		for(Iterator<?> i = triplesRoot.elementIterator(); i.hasNext();)
 		{
 			Element tripleElement = (Element) i.next();
 			triples.add(new Triple(tripleElement.getText()));
