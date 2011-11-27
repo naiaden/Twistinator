@@ -6,7 +6,10 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+
 import nl.naiaden.twistinator.indexer.input.Text;
+import nl.naiaden.twistinator.server.TwistServerHandler;
 
 /**
  * This class is a mapping between parents (Texts) and children (Sents).
@@ -23,7 +26,10 @@ import nl.naiaden.twistinator.indexer.input.Text;
  * @author louis
  *
  */
-public class TextRegister {
+public class TextRegister 
+{
+	static Logger log = Logger.getLogger(TextRegister.class);
+	
 	private Map<String, Text> register = null;
 	
 	/**
@@ -112,13 +118,16 @@ public class TextRegister {
 	 */
 	public void add(String textId, String sentId)
 	{
-		if(contains(textId))
+		
+		if(!contains(textId))
 		{
 			Text text = new Text(textId);
 			text.add(sentId);
 			register.put(textId, text);
+			log.debug("Adding " + sentId + " to new " + textId);
 		} else
 		{
+			log.debug("Adding " + sentId + " to existing " + textId);
 			register.get(textId).add(sentId);
 		}
 	}

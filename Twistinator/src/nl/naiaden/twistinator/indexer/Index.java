@@ -155,7 +155,7 @@ public class Index
 				
 				for(Text text : textRegister.values())
 				{
-					System.out.println(text.toString());
+					log.debug(text.toString());
 				}
 				
 				Application.logTiming(log, "Building index took " + (System.nanoTime() - startBuilding) * 1e-9 + " seconds");

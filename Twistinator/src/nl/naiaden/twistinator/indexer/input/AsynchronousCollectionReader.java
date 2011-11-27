@@ -164,10 +164,12 @@ public class AsynchronousCollectionReader implements Reader
 		// iterate through meta data
 		TextMetadata metadata = processMetaData(textRoot.element("metadata"));
 		
+		textRegister.add(textId, new Text(textId, metadata));
+		
 		// iterate through sentences (Sents)
 		processSents(textRoot.element("sentences"), textId);
 		
-		textRegister.add(textId, new Text(textId, metadata));
+		
 		++nrTexts;
 	}
 	

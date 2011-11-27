@@ -6,6 +6,7 @@ package nl.naiaden.twistinator;
 import java.io.File;
 import java.io.IOException;
 import nl.naiaden.twistinator.indexer.Index;
+import nl.naiaden.twistinator.indexer.input.AsynchronousCollectionReader;
 import nl.naiaden.twistinator.indexer.input.AsynchronousSentsReader;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
@@ -57,8 +58,9 @@ public class Test_ServerClient
 		
 		try
 		{
-			Index index = new Index(new File("/tmp/indextest"), AsynchronousSentsReader.class);
-			index.addToIndex(new File("/home/louis/Desktop/git/Twistinator/Indexer/tinyFile.txt"));
+			Index index = new Index(new File("/tmp/indextest"), AsynchronousCollectionReader.class);
+//			index.addToIndex(new File("/home/louis/Desktop/git/Twistinator/Indexer/tinyFile.txt"));
+			index.addToIndex(new File("tinyCollection.txt"));
 			
 		} catch (IOException e)
 		{
