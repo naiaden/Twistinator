@@ -58,10 +58,10 @@ public class Test_ServerClient
 		
 		try
 		{
-			Index index = new Index(new File("/tmp/indextest"), AsynchronousCollectionReader.class);
-//			index.addToIndex(new File("/home/louis/Desktop/git/Twistinator/Indexer/tinyFile.txt"));
-			index.addToIndex(new File("tinyCollection.txt"));
-			
+//			Index index = new Index(new File("/tmp/indextest"), AsynchronousCollectionReader.class);
+//			index.addToIndex(new File("doc/example.collection"));
+			Index index = new Index(new File("/tmp/indextest"), AsynchronousSentsReader.class);
+			index.addToIndex(new File("doc/example.sents"));
 		} catch (IOException e)
 		{
 			// TODO Auto-generated catch block

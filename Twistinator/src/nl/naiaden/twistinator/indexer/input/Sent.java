@@ -19,7 +19,7 @@ import nl.naiaden.twistinator.indexer.document.Triples;
  */
 public class Sent
 {
-	public static final String headerRegex = "^# \\(null\\) (\\d+) (\\d+)-(\\d+)\\|(.*)$";
+	public static final String headerRegex = "^# \\(null\\) (\\w+) (\\d+)-(\\d+)\\|(.*)$";
 
 	private String id;
 	private String sentence;

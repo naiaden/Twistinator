@@ -118,16 +118,13 @@ public class TextRegister
 	 */
 	public void add(String textId, String sentId)
 	{
-		
 		if(!contains(textId))
 		{
 			Text text = new Text(textId);
 			text.add(sentId);
 			register.put(textId, text);
-			log.debug("Adding " + sentId + " to new " + textId);
 		} else
 		{
-			log.debug("Adding " + sentId + " to existing " + textId);
 			register.get(textId).add(sentId);
 		}
 	}
