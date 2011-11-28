@@ -90,13 +90,18 @@ public class Application
 			Index index = new Index(new File((String) applicationContext.getVariable("index")));
 			if(!applicationContext.getVariableValue("reader").isEmpty())
 			{
+
 				Class<? extends Reader> readerClass = ReaderFactory.toClass(applicationContext.getVariableValue("reader"));
 				if(readerClass != null)
 				{
 					index.setReader(readerClass);
+					log.info("Using AsynchronousCollectionReader!");
 				}
+			} else
+			{
+				log.info("Using AsynchronousSentsReader!");
 			}
-			
+
 			File file;
 
 			switch (applicationContext.getMode())

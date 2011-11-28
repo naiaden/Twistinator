@@ -3,13 +3,16 @@
  */
 package nl.naiaden.twistinator.server;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
+import nl.naiaden.twistinator.indexer.Index;
 import nl.naiaden.twistinator.objects.SearchQuery;
-import nl.naiaden.twistinator.objects.SearchResult;
 import nl.naiaden.twistinator.objects.ThankYouMessage;
 
 import org.apache.log4j.Logger;
+import org.apache.lucene.search.ScoreDoc;
 import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
@@ -59,11 +62,12 @@ public class TwistServerHandler extends SimpleChannelUpstreamHandler
 		// Echo back the received object to the client.
 		if(e.getMessage() instanceof ThankYouMessage)
 		{
-			log.info("Thanks for serving me");
+			log.info("Incoming: Thanks for serving me");
 
 			final ChannelFuture future = e.getChannel().close();
 			future.addListener(new ChannelFutureListener()
 			{
+				@Override
 				public void operationComplete(final ChannelFuture future)
 				{
 					log.info("post-closure");
@@ -71,9 +75,26 @@ public class TwistServerHandler extends SimpleChannelUpstreamHandler
 			});
 		} if(e.getMessage() instanceof SearchQuery)
 		{
+			log.info("Incoming: " + ((SearchQuery) e.getMessage()).toString());
+
+
+			SearchQuery sq = (SearchQuery) e.getMessage();
 			transferredMessages.incrementAndGet();
-			log.info(((SearchQuery) e.getMessage()).toString());
-			e.getChannel().write(new SearchResult("test"));
+
+			// process input
+			try
+			{
+				Index index = new Index(new File("/tmp/twistinator"));
+				ScoreDoc[] docs = index.searchIndex(sq, 1000);
+				log.info("nr docs: " + docs.length);
+			} catch (IOException e1)
+			{
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
+			log.info("Incoming: " + ((SearchQuery) e.getMessage()).toString());
+			//			e.getChannel().write(new SearchResult("test"));
 		}
 	}
 }

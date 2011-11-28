@@ -3,17 +3,28 @@
  */
 package nl.naiaden.twistinator.indexer.document;
 
+import java.io.Serializable;
+
 /**
  * @author louis
  * 
  */
-public class Relator
+public class Relator implements Serializable
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8421829753892371436L;
 	private String relator;
 
 	public Relator(String relator)
 	{
 		this.relator = relator;
+	}
+
+	public boolean containsWildcard()
+	{
+		return relator.contains("*") || relator.contains("?");
 	}
 
 	/**
@@ -25,22 +36,17 @@ public class Relator
 		this.relator = relator.toString();
 	}
 
+	@Override
+	public String toString()
+	{
+		return relator;
+	}
+
 	/**
 	 * @return the relator
 	 */
 	protected String getRelator()
 	{
 		return relator;
-	}
-
-	@Override
-	public String toString()
-	{
-		return relator;
-	}
-	
-	public boolean containsWildcard()
-	{		
-		return relator.contains("*") || relator.contains("?");
 	}
 }

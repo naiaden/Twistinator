@@ -5,12 +5,18 @@ package nl.naiaden.twistinator.indexer.document;
 
 import java.util.Vector;
 
+import nl.naiaden.twistinator.objects.Searchable;
+
 /**
  * @author louis
  * 
  */
-public class Keyword
+public class Keyword implements Searchable
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4866659661240584202L;
 	private String keyword;
 	private Vector<String> partsOfSpeech;
 
@@ -26,13 +32,9 @@ public class Keyword
 		this.setPartsOfSpeech(partsOfSpeech);
 	}
 
-	/**
-	 * @param keyword
-	 *            the keyword to set
-	 */
-	public void setKeyword(String keyword)
+	public boolean containsWildcard()
 	{
-		this.keyword = keyword;
+		return keyword.contains("*") || keyword.contains("?");
 	}
 
 	/**
@@ -44,6 +46,23 @@ public class Keyword
 	}
 
 	/**
+	 * @return the partsOfSpeech
+	 */
+	public Vector<String> getPartsOfSpeech()
+	{
+		return partsOfSpeech;
+	}
+
+	/**
+	 * @param keyword
+	 *            the keyword to set
+	 */
+	public void setKeyword(String keyword)
+	{
+		this.keyword = keyword;
+	}
+
+	/**
 	 * @param partsOfSpeech
 	 *            the partsOfSpeech to set
 	 */
@@ -52,22 +71,9 @@ public class Keyword
 		this.partsOfSpeech = partsOfSpeech;
 	}
 
-	/**
-	 * @return the partsOfSpeech
-	 */
-	public Vector<String> getPartsOfSpeech()
-	{
-		return partsOfSpeech;
-	}
-
 	@Override
 	public String toString()
 	{
 		return keyword;
-	}
-	
-	public boolean containsWildcard()
-	{		
-		return keyword.contains("*") || keyword.contains("?");
 	}
 }

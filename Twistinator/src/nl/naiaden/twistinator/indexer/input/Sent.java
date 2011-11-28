@@ -6,18 +6,19 @@ package nl.naiaden.twistinator.indexer.input;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-
 import nl.naiaden.twistinator.indexer.Index;
 import nl.naiaden.twistinator.indexer.document.Triple;
 import nl.naiaden.twistinator.indexer.document.Triples;
+import nl.naiaden.twistinator.objects.Returnable;
+
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
 
 /**
  * @author louis
  * 
  */
-public class Sent
+public class Sent implements Returnable
 {
 	public static final String headerRegex = "^# \\(null\\) (\\w+) (\\d+)-(\\d+)\\|(.*)$";
 
@@ -26,6 +27,14 @@ public class Sent
 	private Triples triples;
 	private String parentDocument;
 
+	public Sent()
+	{
+		id = null;
+		sentence = null;
+		triples = new Triples();
+		parentDocument = "";
+	}
+
 	public Sent(String id, String sentence, Triples triples, String parentDocument)
 	{
 		this.id = id;
@@ -33,17 +42,17 @@ public class Sent
 		this.sentence = sentence;
 		this.triples = triples;
 	}
-	
-	public void setSentence(String sentence)
+
+	/**
+	 * 
+	 * @param header
+	 * @param triples
+	 */
+	public Sent(String header, Triples triples)
 	{
-		this.sentence = sentence;
+		this(header,triples,null);
 	}
-	
-	public String getSentence()
-	{
-		return sentence;
-	}
-	
+
 	/**
 	 * 
 	 * @param header
@@ -57,22 +66,41 @@ public class Sent
 		this.parentDocument = parentDocument;
 	}
 
-	/**
-	 * 
-	 * @param header
-	 * @param triples
-	 */
-	public Sent(String header, Triples triples)
+	public void addTriple(Triple triple)
 	{
-		this(header,triples,null);
+		triples.add(triple);
 	}
 
-	public Sent()
+	/**
+	 * @return the parentDocument
+	 */
+	public String getParentDocument()
 	{
-		this.id = null;
-		this.sentence = null;
-		this.triples = new Triples();
-		this.parentDocument = "";
+		return parentDocument;
+	}
+
+	public String getSentence()
+	{
+		return sentence;
+	}
+
+	/**
+	 * @return the triples
+	 */
+	public Triples getTriples()
+	{
+		return triples;
+	}
+
+	public void processHeader(String header) {
+		Pattern headerPattern = Pattern.compile(Sent.headerRegex);
+		Matcher headerMatcher = headerPattern.matcher(header);
+		while (headerMatcher.find())
+		{
+			id = headerMatcher.group(1);
+			sentence = headerMatcher.group(4);
+		}
+
 	}
 
 	/**
@@ -84,15 +112,18 @@ public class Sent
 		processHeader(header);
 	}
 
-	public void processHeader(String header) {
-		Pattern headerPattern = Pattern.compile(Sent.headerRegex);
-		Matcher headerMatcher = headerPattern.matcher(header);
-		while (headerMatcher.find())
-		{
-			id = headerMatcher.group(1);
-			sentence = headerMatcher.group(4);
-		}
-		
+	/**
+	 * @param parentDocument
+	 *            the parentDocument to set
+	 */
+	public void setParentDocument(String parentDocument)
+	{
+		this.parentDocument = parentDocument;
+	}
+
+	public void setSentence(String sentence)
+	{
+		this.sentence = sentence;
 	}
 
 	/**
@@ -104,51 +135,6 @@ public class Sent
 		this.triples = triples;
 	}
 
-	/**
-	 * @return the triples
-	 */
-	public Triples getTriples()
-	{
-		return triples;
-	}
-
-	/**
-	 * @param parentDocument
-	 *            the parentDocument to set
-	 */
-	public void setParentDocument(String parentDocument)
-	{
-		this.parentDocument = parentDocument;
-	}
-
-	/**
-	 * @return the parentDocument
-	 */
-	public String getParentDocument()
-	{
-		return parentDocument;
-	}
-
-	public void addTriple(Triple triple)
-	{
-		triples.add(triple);
-	}
-
-	@Override
-	public String toString()
-	{
-		StringBuilder s = new StringBuilder();
-		String newLine = System.getProperty("line.separator");
-
-		s.append("[" + id + "/" + parentDocument + "] " + sentence + newLine);
-		for (Triple triple : triples)
-		{
-			s.append(triple.toString() + newLine);
-		}
-
-		return s.toString();
-	}
-	
 	/*
 	 * # (null) x y-z|Dit is een testzin. # parsing 1 time 0.006 penalty 3
 	 * posmemo: known 323, blocked 1502, unknown 13066 [N:C:testzin,DET,een]
@@ -166,8 +152,23 @@ public class Sent
 		doc.add(new Field(Index.FIELD_SENTENCE, sentence, Field.Store.YES, Field.Index.ANALYZED)); // NO
 		doc.add(new Field(Index.FIELD_TRIPLES, triples.toString(), Field.Store.YES, Field.Index.ANALYZED)); // NA
 
-//		log.debug(doc.get("id") + " +++ " + sent.getTriples().toString());
+		//		log.debug(doc.get("id") + " +++ " + sent.getTriples().toString());
 
 		return doc;
+	}
+
+	@Override
+	public String toString()
+	{
+		StringBuilder s = new StringBuilder();
+		String newLine = System.getProperty("line.separator");
+
+		s.append("[" + id + "/" + parentDocument + "] " + sentence + newLine);
+		for (Triple triple : triples)
+		{
+			s.append(triple.toString() + newLine);
+		}
+
+		return s.toString();
 	}
 }

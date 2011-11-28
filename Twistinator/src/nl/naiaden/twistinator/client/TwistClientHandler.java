@@ -7,6 +7,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
+import nl.naiaden.twistinator.indexer.document.Keyword;
+import nl.naiaden.twistinator.indexer.document.Relator;
+import nl.naiaden.twistinator.indexer.document.Triple;
 import nl.naiaden.twistinator.objects.SearchQuery;
 import nl.naiaden.twistinator.objects.SearchResult;
 import nl.naiaden.twistinator.objects.ThankYouMessage;
@@ -45,7 +48,7 @@ public class TwistClientHandler extends SimpleChannelUpstreamHandler
 	public void channelConnected(final ChannelHandlerContext ctx, final ChannelStateEvent e)
 	{
 		// Send the first message if this handler is a client-side handler.
-		e.getChannel().write(new SearchQuery("QUERY"));
+		e.getChannel().write(new SearchQuery(new Triple(new Keyword("assembly"), new Relator("DET"), new Keyword("a"))));
 	}
 
 	@Override
@@ -99,6 +102,7 @@ public class TwistClientHandler extends SimpleChannelUpstreamHandler
 		e.getChannel().write(new ThankYouMessage());
 		e.getChannel().close().addListener(new ChannelFutureListener()
 		{
+			@Override
 			public void operationComplete(ChannelFuture future)
 			{
 				boolean offered = answer.offer((SearchResult) e.getMessage());

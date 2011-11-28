@@ -15,11 +15,11 @@ public class SearchQuery implements Serializable
 	 * 
 	 */
 	private static final long serialVersionUID = 5259322374034472167L;
-	public String query;
+	public Searchable query;
 
-	public SearchQuery(String string)
+	public SearchQuery(Searchable searchable)
 	{
-		query = string;
+		query = searchable;
 	}
 
 	@Override

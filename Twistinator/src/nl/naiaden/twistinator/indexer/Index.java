@@ -10,12 +10,14 @@ import java.util.regex.Pattern;
 
 import nl.naiaden.twistinator.Application;
 import nl.naiaden.twistinator.analysis.PatternAnalyzer;
+import nl.naiaden.twistinator.indexer.document.Keyword;
 import nl.naiaden.twistinator.indexer.document.Triple;
 import nl.naiaden.twistinator.indexer.input.AsynchronousSentsReader;
 import nl.naiaden.twistinator.indexer.input.Reader;
 import nl.naiaden.twistinator.indexer.input.ReaderFactory;
 import nl.naiaden.twistinator.indexer.input.Text;
 import nl.naiaden.twistinator.indexer.output.AsynchronousIndexerWriter;
+import nl.naiaden.twistinator.objects.SearchQuery;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -54,7 +56,7 @@ public class Index
 	private TextRegister textRegister;
 	private Class<? extends Reader> readerClass;
 	private Class<?> writerClass;
-	
+
 	public static final String FIELD_ID = "id";
 	public static final String FIELD_PARENTID = "parentId";
 	public static final String FIELD_TRIPLES = "triples";
@@ -64,7 +66,7 @@ public class Index
 	{
 		this(indexFile, AsynchronousSentsReader.class);
 	}
-	
+
 	public Index(File indexFile, Class<? extends Reader> reader) throws IOException
 	{
 		this(indexFile, reader, AsynchronousIndexerWriter.class);
@@ -77,25 +79,7 @@ public class Index
 		readerClass = reader;
 		writerClass = writer;
 	}
-	
-	/**
-	 * Set the type of index writer
-	 * @param writer the index writer class
-	 */
-	public void setWriter(Class<?> writer)
-	{
-		writerClass = writer;
-	}
-	
-	/**
-	 * Set the type of input reader
-	 * @param reader the input reader class
-	 */
-	public void setReader(Class<? extends Reader> reader)
-	{
-		readerClass = reader;
-	}
-	
+
 	public void addToIndex(File inputFile)
 	{
 		try
@@ -116,8 +100,8 @@ public class Index
 			IndexWriter indexWriter = new IndexWriter(indexDirectory, indexWriterConfig);
 
 			LinkedBlockingQueue<Document> queue = new LinkedBlockingQueue<Document>(10000);
-			
-			Reader reader = ReaderFactory.create(readerClass, inputFile, queue);			
+
+			Reader reader = ReaderFactory.create(readerClass, inputFile, queue);
 			Thread readerThread = new Thread(reader, "AsynReader");
 			readerThread.start();
 
@@ -152,12 +136,12 @@ public class Index
 				writer.optimize();
 				writer.close();
 
-				
+
 				for(Text text : textRegister.values())
 				{
 					log.debug(text.toString());
 				}
-				
+
 				Application.logTiming(log, "Building index took " + (System.nanoTime() - startBuilding) * 1e-9 + " seconds");
 				log.info("Index size: " + FileUtils.byteCountToDisplaySize(FileUtils.sizeOf(indexFile)));
 
@@ -190,7 +174,7 @@ public class Index
 		try
 		{
 			textRegister = new TextRegister();
-			
+
 			if(indexFile.exists())
 			{
 				log.info("Removing index: " + indexFile.getAbsolutePath());
@@ -205,17 +189,74 @@ public class Index
 		}
 	}
 
+	public ScoreDoc[] searchIndex(SearchQuery searchQuery, int numberOfResults)
+	{
+		if(searchQuery.query instanceof Triple)
+		{
+			Triple triple = (Triple) searchQuery.query;
+			return searchIndexForTriple(triple, numberOfResults);
+		}
+		if(searchQuery.query instanceof Keyword)
+		{
+			Keyword keyword = (Keyword) searchQuery.query;
+			return searchIndexForKeyword(keyword, numberOfResults);
+		}
+		log.error("Cannot use '" + searchQuery.toString() + "' to search in the index");
+		return null;
+	}
+
+	public ScoreDoc[] searchIndexForKeyword(Keyword word, int numberOfResults)
+	{
+		try
+		{
+			IndexReader indexReader = IndexReader.open(indexDirectory);
+			IndexSearcher indexSearcher = new IndexSearcher(indexReader);
+
+			Analyzer normalAnalyzer = new StandardAnalyzer(Version.LUCENE_34);
+			QueryParser queryParser = new QueryParser(Version.LUCENE_34, FIELD_SENTENCE, normalAnalyzer);
+			Query nQuery = queryParser.parse(word.getKeyword());
+
+			ScoreDoc[] hits = indexSearcher.search(nQuery, null, numberOfResults).scoreDocs;
+			log.info("Number of hits for '" + word + "' in sentence: " + hits.length);
+			//			log.info("Number of hits for '" + word + "' in sentence: " + hits.length + " (showing first " + numberOfResults + " documents)");
+
+			return hits;
+
+			/*
+			 * For paginated results see
+			 * http://hrycan.com/2010/02/10/paginating-lucene-search-results/
+			 */
+			//			for(ScoreDoc scoreDoc : nTopDocs.scoreDocs)
+			//			{
+			//				Document doc = indexSearcher.doc(scoreDoc.doc);
+			//				System.out.printf("[%5.3f] %s\n", scoreDoc.score, doc.get(FIELD_SENTENCE));
+			//			}
+
+		} catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		log.warn("Searching index for keywords failed!");
+		return null;
+	}
+
 	public ScoreDoc[] searchIndexForTriple(Triple triple, int numberOfResults)
 	{
 		try
 		{
 			IndexReader indexReader = IndexReader.open(indexDirectory);
 			IndexSearcher indexSearcher = new IndexSearcher(indexReader);
-		
+
 			Query tQuery = null;
-			
+
 			// Wildcard queries can be much slower as they need to iterate over many terms.
-			// Unless a query really contains a wildcard, we do it the normal way 
+			// Unless a query really contains a wildcard, we do it the normal way
 			if(triple.containsWildcard())
 			{
 				tQuery = new WildcardQuery(new Term(FIELD_TRIPLES, triple.toString(false)));
@@ -226,7 +267,7 @@ public class Index
 
 			ScoreDoc[] hits = indexSearcher.search(tQuery, null, 1000).scoreDocs;
 			log.info("Number of hits for '" + triple + "' in triples: " + hits.length);
-			
+
 			return hits;
 
 		} catch (IOException e)
@@ -272,6 +313,23 @@ public class Index
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
 
+	/**
+	 * Set the type of input reader
+	 * @param reader the input reader class
+	 */
+	public void setReader(Class<? extends Reader> reader)
+	{
+		readerClass = reader;
+	}
+
+	/**
+	 * Set the type of index writer
+	 * @param writer the index writer class
+	 */
+	public void setWriter(Class<?> writer)
+	{
+		writerClass = writer;
 	}
 }

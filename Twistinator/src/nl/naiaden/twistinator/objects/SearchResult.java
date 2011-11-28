@@ -15,12 +15,12 @@ public class SearchResult implements Serializable
 	 * 
 	 */
 	private static final long serialVersionUID = 4848065184695219363L;
-	public String result;
+	public Returnable result;
 
 	/**
 	 * @param string
 	 */
-	public SearchResult(String string)
+	public SearchResult(Returnable string)
 	{
 		result = string;
 	}

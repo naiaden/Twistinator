@@ -5,43 +5,55 @@ package nl.naiaden.twistinator.indexer.input;
 
 import java.util.TreeSet;
 
+import nl.naiaden.twistinator.objects.Returnable;
+
 /**
  * @author louis
  *
  */
-public class Text 
+public class Text implements Returnable
 {
+	private String textId;
+
+	private TreeSet<String> sentIds;
+
+	private TextMetadata metadata;
+
 	public Text(String textId)
 	{
 		this(textId, new TextMetadata());
 	}
-	
+
 	public Text(String textId, TextMetadata metadata)
 	{
 		this(textId, metadata, new TreeSet<String>());
 	}
-	
+
 	public Text(String textId, TextMetadata metadata, TreeSet<String> sentIds)
 	{
 		this.textId = textId;
 		this.metadata = metadata;
 		this.sentIds = sentIds;
 	}
-	
+
 	/**
-	 * @return the sentIds
+	 * Add the sentence id to the document. Only unique sentence identifiers
+	 * are stored.
+	 * @param sentId the id of the sentence: a child of the document
 	 */
-	public TreeSet<String> getSentIds()
+	public void add(String sentId)
 	{
-		return this.sentIds;
+		sentIds.add(sentId);
 	}
 
 	/**
-	 * @param sentIds the sentIds to set
+	 * Add the sentence ids to the Text. Only unique sentence identifiers are
+	 * stored.
+	 * @param sentIdsNew the ids of the sentences: the children of the document
 	 */
-	public void setSentIds(TreeSet<String> sentIds)
+	public void add(TreeSet<String> sentIdsNew)
 	{
-		this.sentIds = sentIds;
+		sentIds.addAll(sentIdsNew);
 	}
 
 	/**
@@ -49,7 +61,31 @@ public class Text
 	 */
 	public TextMetadata getMetadata()
 	{
-		return this.metadata;
+		return metadata;
+	}
+	/**
+	 * @return the sentIds
+	 */
+	public TreeSet<String> getSentIds()
+	{
+		return sentIds;
+	}
+	/**
+	 * @return the textId
+	 */
+	public String getTextId()
+	{
+		return textId;
+	}
+
+	/**
+	 * If there are already sentence identifiers for this document, the
+	 * current content is replaced.
+	 * @param sentIds the ids of the sentences: the children of the document
+	 */
+	public void replace(TreeSet<String> sentIdsNew)
+	{
+		sentIds = sentIdsNew;
 	}
 
 	/**
@@ -61,17 +97,13 @@ public class Text
 	}
 
 	/**
-	 * @return the textId
+	 * @param sentIds the sentIds to set
 	 */
-	public String getTextId()
+	public void setSentIds(TreeSet<String> sentIds)
 	{
-		return this.textId;
+		this.sentIds = sentIds;
 	}
 
-	private String textId;
-	private TreeSet<String> sentIds;
-	private TextMetadata metadata;
-	
 	/**
 	 * The number of children sentences
 	 * @return the number of children sentences
@@ -80,44 +112,15 @@ public class Text
 	{
 		return sentIds.size();
 	}
-	
-	/**
-	 * Add the sentence ids to the Text. Only unique sentence identifiers are 
-	 * stored.
-	 * @param sentIdsNew the ids of the sentences: the children of the document
-	 */
-	public void add(TreeSet<String> sentIdsNew)
-	{
-		sentIds.addAll(sentIdsNew);
-	}
-	
-	/**
-	 * Add the sentence id to the document. Only unique sentence identifiers
-	 * are stored.
-	 * @param sentId the id of the sentence: a child of the document
-	 */
-	public void add(String sentId)
-	{
-		sentIds.add(sentId);
-	}
-	
-	/**
-	 * If there are already sentence identifiers for this document, the 
-	 * current content is replaced.
-	 * @param sentIds the ids of the sentences: the children of the document
-	 */
-	public void replace(TreeSet<String> sentIdsNew)
-	{
-		sentIds = sentIdsNew;
-	}
-	
+
+	@Override
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder();
-		
+
 		sb.append("[" + textId + "] " + sentIds.toString() + " " + metadata.toString() );
-		
+
 		return sb.toString();
 	}
-	
+
 }

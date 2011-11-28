@@ -21,7 +21,6 @@ import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
  */
 public class TwistClient
 {
-
 	static Logger log = Logger.getLogger(TwistClient.class);
 
 	static
