@@ -1,0 +1,44 @@
+This is the readme for Twistinator.
+
+Twistinator is a tool to search for triples and words in an index.
+
+Installation:
+   In the future we will build a self-containing jar, but for now, you must
+   compile the source yourself. All the necessary libraries are included.
+   
+Usage:
+   Example scenario
+      - First create an index:
+         Application -c /tmp/twistinator -f doc/example.collection   \
+            -reader AsynchronousCollectionReader
+            
+      - Then start the server:
+         nl.naiaden.twistinator.server.TwistServer
+         
+      - Start the client:
+         nl.naiaden.twistinator.client.TwistClient
+         
+      Now you will see that there are two results: sentences m1 and p2
+
+License:
+   The software is heavily based on open-source projects.
+      Apache Commons (Apache License 2.0)
+      Apache Logging Services (Apache License 2.0)
+      Apache Lucene (Apache License 2.0)
+      Netty (Apache License 2.0)
+      Dom4j (Custom License)
+      (see LICENSE.apache for the Apache License 2.0, and LICENSE.dom4j for the
+      Dom4j license)
+   
+   Our code will also be licensed under the Apache License 2.0. In a future
+   stadium I will put the notices in the code.
+      
+
+Contact:
+   Contact me at louis@naiaden.nl for questions, comments and other issues
+
+Changelog:
+   v0.1  Indexer implemented for triples and words
+         First step towards input reader
+   v0.2  Server/client-component implemented
+   v0.3  Collection reader implemented

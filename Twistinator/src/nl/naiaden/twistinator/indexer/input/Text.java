@@ -13,6 +13,11 @@ import nl.naiaden.twistinator.objects.Returnable;
  */
 public class Text implements Returnable
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7690769184820465887L;
+
 	private String textId;
 
 	private TreeSet<String> sentIds;

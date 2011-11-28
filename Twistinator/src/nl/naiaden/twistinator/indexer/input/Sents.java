@@ -51,6 +51,10 @@ public class Sents implements Iterable<Sent>, Returnable
 			okToRemove = false;
 		}
 	}
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1876671409567809159L;
 
 	private static final int DEFAULT_CAPACITY = 10;
 

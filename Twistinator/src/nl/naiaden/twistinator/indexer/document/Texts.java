@@ -51,6 +51,10 @@ public class Texts implements Iterable<Text>, Returnable
 			okToRemove = false;
 		}
 	}
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6409830549948737596L;
 
 	private static final int DEFAULT_CAPACITY = 10;
 

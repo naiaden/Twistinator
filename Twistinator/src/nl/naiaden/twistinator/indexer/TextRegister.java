@@ -90,6 +90,11 @@ public class TextRegister
 		return register.containsKey(textId);
 	}
 
+	public Text get(String textId)
+	{
+		return register.get(textId);
+	}
+
 	/**
 	 * Get the sentence identifiers belong to a certain document
 	 * @param textId the id of the document

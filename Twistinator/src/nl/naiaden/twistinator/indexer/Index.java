@@ -15,8 +15,11 @@ import nl.naiaden.twistinator.indexer.document.Triple;
 import nl.naiaden.twistinator.indexer.input.AsynchronousSentsReader;
 import nl.naiaden.twistinator.indexer.input.Reader;
 import nl.naiaden.twistinator.indexer.input.ReaderFactory;
+import nl.naiaden.twistinator.indexer.input.Sent;
+import nl.naiaden.twistinator.indexer.input.Sents;
 import nl.naiaden.twistinator.indexer.input.Text;
 import nl.naiaden.twistinator.indexer.output.AsynchronousIndexerWriter;
+import nl.naiaden.twistinator.objects.Returnable;
 import nl.naiaden.twistinator.objects.SearchQuery;
 
 import org.apache.commons.io.FileUtils;
@@ -189,7 +192,7 @@ public class Index
 		}
 	}
 
-	public ScoreDoc[] searchIndex(SearchQuery searchQuery, int numberOfResults)
+	public Returnable searchIndex(SearchQuery searchQuery, int numberOfResults)
 	{
 		if(searchQuery.query instanceof Triple)
 		{
@@ -205,7 +208,7 @@ public class Index
 		return null;
 	}
 
-	public ScoreDoc[] searchIndexForKeyword(Keyword word, int numberOfResults)
+	public Returnable searchIndexForKeyword(Keyword word, int numberOfResults)
 	{
 		try
 		{
@@ -220,7 +223,16 @@ public class Index
 			log.info("Number of hits for '" + word + "' in sentence: " + hits.length);
 			//			log.info("Number of hits for '" + word + "' in sentence: " + hits.length + " (showing first " + numberOfResults + " documents)");
 
-			return hits;
+			Sents sents = new Sents();
+
+			for(ScoreDoc hit : hits)
+			{
+				Document d = indexSearcher.doc(hit.doc);
+				//				sents.add(textRegister.get(d.get(FIELD_PARENTID)));
+				sents.add(new Sent(d));
+			}
+
+			return sents;
 
 			/*
 			 * For paginated results see
@@ -246,7 +258,7 @@ public class Index
 		return null;
 	}
 
-	public ScoreDoc[] searchIndexForTriple(Triple triple, int numberOfResults)
+	public Returnable searchIndexForTriple(Triple triple, int numberOfResults)
 	{
 		try
 		{
@@ -268,7 +280,16 @@ public class Index
 			ScoreDoc[] hits = indexSearcher.search(tQuery, null, 1000).scoreDocs;
 			log.info("Number of hits for '" + triple + "' in triples: " + hits.length);
 
-			return hits;
+			Sents sents = new Sents();
+
+			for(ScoreDoc hit : hits)
+			{
+				Document d = indexSearcher.doc(hit.doc);
+				//				sents.add(textRegister.get(d.get(FIELD_PARENTID)));
+				sents.add(new Sent(d));
+			}
+
+			return sents;
 
 		} catch (IOException e)
 		{

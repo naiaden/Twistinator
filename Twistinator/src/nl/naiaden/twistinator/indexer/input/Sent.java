@@ -20,6 +20,11 @@ import org.apache.lucene.document.Field;
  */
 public class Sent implements Returnable
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8400710086703648175L;
+
 	public static final String headerRegex = "^# \\(null\\) (\\w+) (\\d+)-(\\d+)\\|(.*)$";
 
 	private String id;
@@ -33,6 +38,17 @@ public class Sent implements Returnable
 		sentence = null;
 		triples = new Triples();
 		parentDocument = "";
+	}
+
+	public Sent(Document doc)
+	{
+		id = doc.get("id");
+		parentDocument = doc.get("parentDocument");
+		sentence = doc.get("sentence");
+
+		triples = new Triples();
+		// TODO
+		// triples = doc.get("triples").fromString();
 	}
 
 	public Sent(String id, String sentence, Triples triples, String parentDocument)

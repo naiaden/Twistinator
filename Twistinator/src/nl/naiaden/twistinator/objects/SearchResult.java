@@ -20,9 +20,9 @@ public class SearchResult implements Serializable
 	/**
 	 * @param string
 	 */
-	public SearchResult(Returnable string)
+	public SearchResult(Returnable result)
 	{
-		result = string;
+		this.result = result;
 	}
 
 	@Override
@@ -30,7 +30,7 @@ public class SearchResult implements Serializable
 	{
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("SearchResult: " + result);
+		sb.append("SearchResult: " + result.toString());
 
 		return sb.toString();
 	}

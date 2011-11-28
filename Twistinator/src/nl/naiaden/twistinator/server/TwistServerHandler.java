@@ -8,11 +8,12 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import nl.naiaden.twistinator.indexer.Index;
+import nl.naiaden.twistinator.indexer.input.Sents;
 import nl.naiaden.twistinator.objects.SearchQuery;
+import nl.naiaden.twistinator.objects.SearchResult;
 import nl.naiaden.twistinator.objects.ThankYouMessage;
 
 import org.apache.log4j.Logger;
-import org.apache.lucene.search.ScoreDoc;
 import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
@@ -81,20 +82,25 @@ public class TwistServerHandler extends SimpleChannelUpstreamHandler
 			SearchQuery sq = (SearchQuery) e.getMessage();
 			transferredMessages.incrementAndGet();
 
+			Sents result = null;
+
 			// process input
 			try
 			{
 				Index index = new Index(new File("/tmp/twistinator"));
-				ScoreDoc[] docs = index.searchIndex(sq, 1000);
-				log.info("nr docs: " + docs.length);
+				result = (Sents) index.searchIndex(sq, 1000);
+				e.getChannel().write(new SearchResult(result));
+
 			} catch (IOException e1)
 			{
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
+			} finally
+			{
+
 			}
 
-			log.info("Incoming: " + ((SearchQuery) e.getMessage()).toString());
-			//			e.getChannel().write(new SearchResult("test"));
+
 		}
 	}
 }
