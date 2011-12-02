@@ -28,6 +28,14 @@ public class Sent implements Returnable
 	public static final String headerRegex = "^# \\(null\\) (\\w+) (\\d+)-(\\d+)\\|(.*)$";
 
 	private String id;
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
 	private String sentence;
 	private Triples triples;
 	private String parentDocument;

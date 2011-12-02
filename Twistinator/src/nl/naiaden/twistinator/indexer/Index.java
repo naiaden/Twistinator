@@ -23,6 +23,7 @@ import nl.naiaden.twistinator.objects.Returnable;
 import nl.naiaden.twistinator.objects.SearchQuery;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
@@ -59,6 +60,8 @@ public class Index
 	private TextRegister textRegister;
 	private Class<? extends Reader> readerClass;
 	private Class<?> writerClass;
+
+	private boolean ignoreId;
 
 	public static final String FIELD_ID = "id";
 	public static final String FIELD_PARENTID = "parentId";
@@ -105,6 +108,7 @@ public class Index
 			LinkedBlockingQueue<Document> queue = new LinkedBlockingQueue<Document>(10000);
 
 			Reader reader = ReaderFactory.create(readerClass, inputFile, queue);
+			reader.setIgnoreId(ignoreId);
 			Thread readerThread = new Thread(reader, "AsynReader");
 			readerThread.start();
 
@@ -352,5 +356,29 @@ public class Index
 	public void setWriter(Class<?> writer)
 	{
 		writerClass = writer;
+	}
+
+	/**
+	 * If the files used to populate the index do not have unique identifiers
+	 * this might lead to unwanted results. With this function one can choose
+	 * whether the identifiers used in the files are also used to identify the
+	 * documents in the index. If the id's are ignored, the indexer chooses an
+	 * identifier for itself.
+	 * @param ignoreId <code>true</code> is the identifiers in the files should
+	 * be ignored, <code>false</code> if the original identifiers should be 
+	 * used
+	 */
+	public void setIgnoreId(boolean ignoreId) {
+		this.ignoreId = ignoreId;
+	}
+	
+	public static String generateSentId()
+	{
+		return RandomStringUtils.randomAlphanumeric(10);
+	}
+	
+	public static String generateTextId()
+	{
+		return RandomStringUtils.randomAlphanumeric(10);
 	}
 }

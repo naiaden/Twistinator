@@ -9,10 +9,12 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 
+import nl.naiaden.twistinator.indexer.Index;
 import nl.naiaden.twistinator.indexer.TextRegister;
 import nl.naiaden.twistinator.indexer.document.Triple;
 import nl.naiaden.twistinator.indexer.document.Triples;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.log4j.Logger;
 import org.apache.lucene.document.Document;
 import org.dom4j.DocumentException;
@@ -85,6 +87,8 @@ public class AsynchronousCollectionReader implements Reader
 	 * Number of texts read so far
 	 */
 	private long nrTexts = 0;
+
+	private boolean ignoreId = false;
 	
 	/**
 	 * @return the nrDocs
@@ -160,6 +164,10 @@ public class AsynchronousCollectionReader implements Reader
 	private void processText(Element textRoot) throws InterruptedException
 	{
 		String textId = textRoot.attributeValue("id");
+		if(ignoreId)
+		{
+			textId = Index.generateTextId();
+		}
 		
 		// iterate through meta data
 		TextMetadata metadata = processMetaData(textRoot.element("metadata"));
@@ -220,6 +228,11 @@ public class AsynchronousCollectionReader implements Reader
 	private void processSent(Element sentRoot, String textId) throws InterruptedException
 	{
 		String sentId = sentRoot.attributeValue("id");
+		if(ignoreId)
+		{
+			sentId = Index.generateSentId();
+		}
+		
 		String sentence = sentRoot.elementText("sent");
 		Triples triples = new Triples();
 		
@@ -245,5 +258,10 @@ public class AsynchronousCollectionReader implements Reader
 	public TextRegister getTextRegister()
 	{
 		return textRegister;
+	}
+
+	@Override
+	public void setIgnoreId(boolean ignoreId) {
+		this.ignoreId = ignoreId;
 	}
 }

@@ -88,20 +88,30 @@ public class Application
 		try
 		{
 			Index index = new Index(new File((String) applicationContext.getVariable("index")));
-			if(!applicationContext.getVariableValue("reader").isEmpty())
+			if(applicationContext.getVariableValue("reader") != null && !applicationContext.getVariableValue("reader").isEmpty())
 			{
 
 				Class<? extends Reader> readerClass = ReaderFactory.toClass(applicationContext.getVariableValue("reader"));
 				if(readerClass != null)
 				{
 					index.setReader(readerClass);
-					log.info("Using AsynchronousCollectionReader!");
 				}
+				log.info("Using AsynchronousCollectionReader!");
 			} else
 			{
+				Class<? extends Reader> readerClass = ReaderFactory.toClass("AsynchronousSentsReader");
+				if(readerClass != null)
+				{
+					index.setReader(readerClass);
+				}
 				log.info("Using AsynchronousSentsReader!");
 			}
-
+			
+			if((Boolean) applicationContext.getVariable("ignoreid"))
+			{
+				index.setIgnoreId(true);
+			}
+			
 			File file;
 
 			switch (applicationContext.getMode())
