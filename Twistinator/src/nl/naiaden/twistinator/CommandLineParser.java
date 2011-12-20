@@ -88,6 +88,27 @@ public class CommandLineParser
 			context.setVariable("writer", cl.getOptionValue("writer"));
 		}
 		
+		if(cl.hasOption("ignoreid"))
+		{
+			boolean b = false;
+			
+			if(cl.getOptionValue("ignoreId") == null)
+			{
+				b = true;
+			} else if(cl.getOptionValue("ignoreid").equals("false"))
+			{
+				b = false;
+			} else
+			{
+				b = true;
+			}
+			
+			context.setVariable("ignoreid", b);
+		} else
+		{
+			context.setVariable("ignoreid", false);
+		}
+		
 		if(cl.hasOption("create"))
 		{
 			context.setMode(ApplicationContext.ApplicationMode.create);
@@ -155,6 +176,7 @@ public class CommandLineParser
 		cmdLineOptions.addOptionGroup(indexOptionGroup);
 		cmdLineOptions.addOption(OptionBuilder.hasArg(true).withArgName("reader").withDescription("type of input reader (AsynchronousCollectionReader or AsynchronousSentsReader)").create("reader"));
 		cmdLineOptions.addOption(OptionBuilder.hasArg(true).withArgName("writer").withDescription("type of index writer (currently only AsynchronousIndexWriter is available)").create("writer"));
+		cmdLineOptions.addOption(OptionBuilder.hasOptionalArg().withArgName("true|false").withDescription("ignore the ids in the input").create("ignoreid"));
 
 		// Searching
 		OptionGroup searchOptionGroup = new OptionGroup();

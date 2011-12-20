@@ -78,6 +78,11 @@ public class ApplicationContext
 		this.triple = triple;
 	}
 
+	public boolean hasValue(String name)
+	{
+		return variables.containsValue(name);
+	}
+	
 	public void setVariable(String name, Object value)
 	{
 		if(value == null)
