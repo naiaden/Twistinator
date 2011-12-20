@@ -7,9 +7,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
-import nl.naiaden.twistinator.indexer.document.Keyword;
-import nl.naiaden.twistinator.indexer.document.Relator;
-import nl.naiaden.twistinator.indexer.document.Triple;
 import nl.naiaden.twistinator.objects.SearchQuery;
 import nl.naiaden.twistinator.objects.SearchResult;
 import nl.naiaden.twistinator.objects.ThankYouMessage;
@@ -35,6 +32,9 @@ public class TwistClientHandler extends SimpleChannelUpstreamHandler
 
 	private final AtomicLong transferredMessages = new AtomicLong();
 	final BlockingQueue<SearchResult> answer = new LinkedBlockingQueue<SearchResult>(1);
+	final BlockingQueue<SearchQuery> queries = new LinkedBlockingQueue<SearchQuery>(1);
+
+	public boolean done = true;
 
 	/**
 	 * Creates a client-side handler.
@@ -44,11 +44,29 @@ public class TwistClientHandler extends SimpleChannelUpstreamHandler
 
 	}
 
+	public void addQuery(SearchQuery query)
+	{
+		queries.add(query);
+		log.debug("Query added: " + query.toString());
+	}
+
 	@Override
 	public void channelConnected(final ChannelHandlerContext ctx, final ChannelStateEvent e)
 	{
 		// Send the first message if this handler is a client-side handler.
-		e.getChannel().write(new SearchQuery(new Triple(new Keyword("assembly"), new Relator("DET"), new Keyword("a"))));
+		// e.getChannel().write(new SearchQuery(new Triple(new Keyword("assembly"), new Relator("DET"), new Keyword("a"))));
+		try
+		{
+			SearchQuery query = queries.take();
+			if(query != null)
+			{
+				e.getChannel().write(query);
+			}
+		} catch (InterruptedException e1)
+		{
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 	}
 
 	@Override
@@ -99,16 +117,25 @@ public class TwistClientHandler extends SimpleChannelUpstreamHandler
 		// Echo back the received object to the client.
 		transferredMessages.incrementAndGet();
 
-		e.getChannel().write(new ThankYouMessage());
-		e.getChannel().close().addListener(new ChannelFutureListener()
+
+
+
+
+		if(done)
 		{
-			@Override
-			public void operationComplete(ChannelFuture future)
+			e.getChannel().write(new ThankYouMessage());
+			e.getChannel().close().addListener(new ChannelFutureListener()
 			{
-				boolean offered = answer.offer((SearchResult) e.getMessage());
-				assert offered;
-				log.info("post-closure");
-			}
-		});
+				@Override
+				public void operationComplete(ChannelFuture future)
+				{
+					boolean offered = answer.offer((SearchResult) e.getMessage());
+					assert offered;
+					log.info("post-closure");
+				}
+			});
+		}
 	}
+
+
 }

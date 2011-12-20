@@ -10,7 +10,9 @@ import java.util.regex.Pattern;
 
 import nl.naiaden.twistinator.Application;
 import nl.naiaden.twistinator.analysis.PatternAnalyzer;
+import nl.naiaden.twistinator.indexer.document.DocumentId;
 import nl.naiaden.twistinator.indexer.document.Keyword;
+import nl.naiaden.twistinator.indexer.document.ParentId;
 import nl.naiaden.twistinator.indexer.document.Triple;
 import nl.naiaden.twistinator.indexer.input.AsynchronousSentsReader;
 import nl.naiaden.twistinator.indexer.input.Reader;
@@ -204,7 +206,84 @@ public class Index
 			Keyword keyword = (Keyword) searchQuery.query;
 			return searchIndexForKeyword(keyword, numberOfResults);
 		}
+		if(searchQuery.query instanceof DocumentId)
+		{
+			DocumentId documentId = (DocumentId) searchQuery.query;
+			return searchIndexForDocumentId(documentId, numberOfResults);
+		}
+		if(searchQuery.query instanceof ParentId)
+		{
+			ParentId parentId = (ParentId) searchQuery.query;
+			return searchIndexForDocumentId(parentId, numberOfResults);
+		}
 		log.error("Cannot use '" + searchQuery.toString() + "' to search in the index");
+		return null;
+	}
+
+	/**
+	 * @param documentId
+	 * @param numberOfResults
+	 * @return
+	 */
+	public Returnable searchIndexForDocumentId(DocumentId documentId, int numberOfResults)
+	{
+		String searchField = FIELD_ID;
+		if(documentId instanceof ParentId)
+		{
+			searchField = FIELD_PARENTID;
+		}
+
+		try
+		{
+			IndexReader indexReader = IndexReader.open(indexDirectory);
+			IndexSearcher indexSearcher = new IndexSearcher(indexReader);
+
+			Analyzer normalAnalyzer = new StandardAnalyzer(Version.LUCENE_34);
+			QueryParser queryParser = new QueryParser(Version.LUCENE_34, searchField, normalAnalyzer);
+			Query nQuery = queryParser.parse(documentId.getDocumentId());
+
+			ScoreDoc[] hits = indexSearcher.search(nQuery, null, numberOfResults).scoreDocs;
+			log.info("Number of hits for document id '" + documentId + "': " + hits.length);
+			//			log.info("Number of hits for '" + word + "' in sentence: " + hits.length + " (showing first " + numberOfResults + " documents)");
+
+			Sents sents = null;
+
+			if(hits.length > 0)
+			{
+
+				sents = new Sents();
+
+				for(ScoreDoc hit : hits)
+				{
+					Document d = indexSearcher.doc(hit.doc);
+					//				sents.add(textRegister.get(d.get(FIELD_PARENTID)));
+					sents.add(new Sent(d));
+				}
+			}
+
+			return sents;
+
+			/*
+			 * For paginated results see
+			 * http://hrycan.com/2010/02/10/paginating-lucene-search-results/
+			 */
+			//			for(ScoreDoc scoreDoc : nTopDocs.scoreDocs)
+			//			{
+			//				Document doc = indexSearcher.doc(scoreDoc.doc);
+			//				System.out.printf("[%5.3f] %s\n", scoreDoc.score, doc.get(FIELD_SENTENCE));
+			//			}
+
+		} catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		log.warn("Searching index for keywords failed!");
 		return null;
 	}
 
@@ -223,13 +302,19 @@ public class Index
 			log.info("Number of hits for '" + word + "' in sentence: " + hits.length);
 			//			log.info("Number of hits for '" + word + "' in sentence: " + hits.length + " (showing first " + numberOfResults + " documents)");
 
-			Sents sents = new Sents();
+			Sents sents = null;
 
-			for(ScoreDoc hit : hits)
+			if(hits.length > 0)
 			{
-				Document d = indexSearcher.doc(hit.doc);
-				//				sents.add(textRegister.get(d.get(FIELD_PARENTID)));
-				sents.add(new Sent(d));
+
+				sents = new Sents();
+
+				for(ScoreDoc hit : hits)
+				{
+					Document d = indexSearcher.doc(hit.doc);
+					//				sents.add(textRegister.get(d.get(FIELD_PARENTID)));
+					sents.add(new Sent(d));
+				}
 			}
 
 			return sents;
@@ -280,13 +365,18 @@ public class Index
 			ScoreDoc[] hits = indexSearcher.search(tQuery, null, 1000).scoreDocs;
 			log.info("Number of hits for '" + triple + "' in triples: " + hits.length);
 
-			Sents sents = new Sents();
+			Sents sents = null;
 
-			for(ScoreDoc hit : hits)
+			if(hits.length > 0)
 			{
-				Document d = indexSearcher.doc(hit.doc);
-				//				sents.add(textRegister.get(d.get(FIELD_PARENTID)));
-				sents.add(new Sent(d));
+				sents = new Sents();
+
+				for(ScoreDoc hit : hits)
+				{
+					Document d = indexSearcher.doc(hit.doc);
+					//				sents.add(textRegister.get(d.get(FIELD_PARENTID)));
+					sents.add(new Sent(d));
+				}
 			}
 
 			return sents;

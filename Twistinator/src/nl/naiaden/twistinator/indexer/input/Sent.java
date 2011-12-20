@@ -43,7 +43,7 @@ public class Sent implements Returnable
 	public Sent(Document doc)
 	{
 		id = doc.get("id");
-		parentDocument = doc.get("parentDocument");
+		parentDocument = doc.get("parentId");
 		sentence = doc.get("sentence");
 
 		triples = new Triples();

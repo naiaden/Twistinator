@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import nl.naiaden.twistinator.indexer.Index;
 import nl.naiaden.twistinator.indexer.input.Sents;
+import nl.naiaden.twistinator.objects.NoResults;
 import nl.naiaden.twistinator.objects.SearchQuery;
 import nl.naiaden.twistinator.objects.SearchResult;
 import nl.naiaden.twistinator.objects.ThankYouMessage;
@@ -78,7 +79,6 @@ public class TwistServerHandler extends SimpleChannelUpstreamHandler
 		{
 			log.info("Incoming: " + ((SearchQuery) e.getMessage()).toString());
 
-
 			SearchQuery sq = (SearchQuery) e.getMessage();
 			transferredMessages.incrementAndGet();
 
@@ -89,15 +89,18 @@ public class TwistServerHandler extends SimpleChannelUpstreamHandler
 			{
 				Index index = new Index(new File("/tmp/twistinator"));
 				result = (Sents) index.searchIndex(sq, 1000);
-				e.getChannel().write(new SearchResult(result));
+				if(result == null)
+				{
+					e.getChannel().write(new NoResults());
+				} else
+				{
+					e.getChannel().write(new SearchResult(result));
+				}
 
 			} catch (IOException e1)
 			{
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
-			} finally
-			{
-
 			}
 
 

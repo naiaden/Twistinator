@@ -6,6 +6,9 @@ package nl.naiaden.twistinator.client;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
+import nl.naiaden.twistinator.indexer.document.DocumentId;
+import nl.naiaden.twistinator.objects.SearchDocumentId;
+
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -55,9 +58,14 @@ public class TwistClient
 		Channel channel = connectFuture.awaitUninterruptibly().getChannel();
 
 		TwistClientHandler handler = (TwistClientHandler) channel.getPipeline().getLast();
+		handler.addQuery(new SearchDocumentId(new DocumentId("e4")));
+		//		handler.addQuery(new SearchDocumentId(new ParentId("doc3")));
+		//		handler.addQuery(new SearchQuery(new Triple(new Keyword("assembly"), new Relator("DET"), new Keyword("a"))));
+		//		handler.addQuery(new SearchQuery(new Triple(new Keyword("assemblya"), new Relator("DET"), new Keyword("a"))));
+		//		[network,ATTR,associated]
 		log.info("Result: " + handler.getMessage().toString());
 
-
+		handler.done = true;
 
 		//		if()
 
