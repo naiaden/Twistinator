@@ -11,6 +11,7 @@ import nl.naiaden.twistinator.indexer.document.Triple;
 import nl.naiaden.twistinator.indexer.document.Triples;
 import nl.naiaden.twistinator.objects.Returnable;
 
+import org.apache.log4j.Logger;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 
@@ -20,6 +21,8 @@ import org.apache.lucene.document.Field;
  */
 public class Sent implements Returnable
 {
+	static Logger log = Logger.getLogger(Sent.class);
+
 	/**
 	 * 
 	 */
@@ -28,18 +31,11 @@ public class Sent implements Returnable
 	public static final String headerRegex = "^# \\(null\\) (\\w+) (\\d+)-(\\d+)\\|(.*)$";
 
 	private String id;
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
 	private String sentence;
-	private Triples triples;
-	private String parentDocument;
 
+	private Triples triples;
+
+	private String parentDocument;
 	public Sent()
 	{
 		id = null;
@@ -47,16 +43,16 @@ public class Sent implements Returnable
 		triples = new Triples();
 		parentDocument = "";
 	}
-
 	public Sent(Document doc)
 	{
 		id = doc.get("id");
 		parentDocument = doc.get("parentId");
 		sentence = doc.get("sentence");
 
-		triples = new Triples();
-		// TODO
+		//		triples = new Triples();
+		triples = Triples.fromString(doc.get("triples"));
 		// triples = doc.get("triples").fromString();
+		//		Pattern tripleSplitter = Triple.tripleSplitter;
 	}
 
 	public Sent(String id, String sentence, Triples triples, String parentDocument)
@@ -93,6 +89,10 @@ public class Sent implements Returnable
 	public void addTriple(Triple triple)
 	{
 		triples.add(triple);
+	}
+
+	public String getId() {
+		return id;
 	}
 
 	/**
@@ -134,6 +134,10 @@ public class Sent implements Returnable
 	public void setHeader(String header)
 	{
 		processHeader(header);
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	/**

@@ -57,17 +57,27 @@ public class Index
 {
 	static Logger log = Logger.getLogger(Index.class);
 
+	public static String generateSentId()
+	{
+		return RandomStringUtils.randomAlphanumeric(10);
+	}
+	public static String generateTextId()
+	{
+		return RandomStringUtils.randomAlphanumeric(10);
+	}
 	private File indexFile;
 	private Directory indexDirectory;
 	private TextRegister textRegister;
+
 	private Class<? extends Reader> readerClass;
+
 	private Class<?> writerClass;
-
 	private boolean ignoreId;
-
 	public static final String FIELD_ID = "id";
 	public static final String FIELD_PARENTID = "parentId";
+
 	public static final String FIELD_TRIPLES = "triples";
+
 	public static final String FIELD_SENTENCE = "sentence";
 
 	public Index(File indexFile) throws IOException
@@ -431,6 +441,20 @@ public class Index
 	}
 
 	/**
+	 * If the files used to populate the index do not have unique identifiers
+	 * this might lead to unwanted results. With this function one can choose
+	 * whether the identifiers used in the files are also used to identify the
+	 * documents in the index. If the id's are ignored, the indexer chooses an
+	 * identifier for itself.
+	 * @param ignoreId <code>true</code> is the identifiers in the files should
+	 * be ignored, <code>false</code> if the original identifiers should be
+	 * used
+	 */
+	public void setIgnoreId(boolean ignoreId) {
+		this.ignoreId = ignoreId;
+	}
+
+	/**
 	 * Set the type of input reader
 	 * @param reader the input reader class
 	 */
@@ -446,29 +470,5 @@ public class Index
 	public void setWriter(Class<?> writer)
 	{
 		writerClass = writer;
-	}
-
-	/**
-	 * If the files used to populate the index do not have unique identifiers
-	 * this might lead to unwanted results. With this function one can choose
-	 * whether the identifiers used in the files are also used to identify the
-	 * documents in the index. If the id's are ignored, the indexer chooses an
-	 * identifier for itself.
-	 * @param ignoreId <code>true</code> is the identifiers in the files should
-	 * be ignored, <code>false</code> if the original identifiers should be 
-	 * used
-	 */
-	public void setIgnoreId(boolean ignoreId) {
-		this.ignoreId = ignoreId;
-	}
-	
-	public static String generateSentId()
-	{
-		return RandomStringUtils.randomAlphanumeric(10);
-	}
-	
-	public static String generateTextId()
-	{
-		return RandomStringUtils.randomAlphanumeric(10);
 	}
 }

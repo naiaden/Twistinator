@@ -5,6 +5,9 @@ package nl.naiaden.twistinator.indexer.document;
 
 import nl.naiaden.twistinator.objects.Returnable;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+
 
 /**
  * @author louis
@@ -52,12 +55,30 @@ public class Triples implements Iterable<Triple>, Returnable
 			okToRemove = false;
 		}
 	}
+
+	static Logger log = Logger.getLogger(Triples.class);
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 6456036091467844473L;
-
 	private static final int DEFAULT_CAPACITY = 10;
+
+	public static Triples fromString(String triplesString)
+	{
+		Triples triples = new Triples();
+
+		for(String triple : triplesString.split("> <|^<|>$"))
+		{
+			if(!StringUtils.isEmpty(triple))
+			{
+				Triple t = new Triple("["+triple+"]");
+				triples.add(t);
+			}
+		}
+
+		return triples;
+	}
 
 	private Triple [ ] theItems;
 
